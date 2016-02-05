@@ -1,4 +1,4 @@
-package com.mrebhan;
+package com.mrebhan.paprika;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

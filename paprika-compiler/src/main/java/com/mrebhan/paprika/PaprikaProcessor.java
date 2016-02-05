@@ -1,6 +1,7 @@
-package com.mrebhan;
+package com.mrebhan.paprika;
 
 import com.google.auto.service.AutoService;
+import com.mrebhan.paprika.consts.Constants;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -31,10 +32,13 @@ import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
+import static com.mrebhan.paprika.consts.Constants.PAPRIKA_PACKAGE;
+import static com.mrebhan.paprika.consts.Constants.PAPRIKA_SQL_SCRIPTS_CLASS_NAME;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
 @AutoService(Processor.class)
 public final class PaprikaProcessor extends AbstractProcessor {
+    private static final ClassName SQL_SCRIPTS = ClassName.get("com.mrebhan.paprika.internal", "SqlScripts");
     private static final Map<String, String> COLUMN_MODIFIERS = new HashMap<>();
 
     static {
@@ -83,15 +87,17 @@ public final class PaprikaProcessor extends AbstractProcessor {
 
         isProcessed = true;
 
-        TypeSpec.Builder builder = TypeSpec.classBuilder("SqlScripts").addModifiers(Modifier.PUBLIC);
+        TypeSpec.Builder builder = TypeSpec.classBuilder(PAPRIKA_SQL_SCRIPTS_CLASS_NAME).addModifiers(Modifier.PUBLIC)
+                .addSuperinterface(SQL_SCRIPTS);
 
         ClassName list = ClassName.get("java.util", "List");
         ClassName string = ClassName.get("java.lang", "String");
         ClassName arrayList = ClassName.get("java.util", "ArrayList");
         TypeName listOfString = ParameterizedTypeName.get(list, string);
 
-        MethodSpec.Builder createMethod = MethodSpec.methodBuilder("createSqlStatements")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+        MethodSpec.Builder createMethod = MethodSpec.methodBuilder("getCreateScripts")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
                 .returns(listOfString);
 
         //add a list of strings
@@ -124,7 +130,7 @@ public final class PaprikaProcessor extends AbstractProcessor {
         createMethod.addStatement("return statements");
         builder.addMethod(createMethod.build());
 
-        JavaFile javaFile = JavaFile.builder("com.mrebhan", builder.build())
+        JavaFile javaFile = JavaFile.builder(PAPRIKA_PACKAGE, builder.build())
                 .addFileComment("Code Generated for Paprika. Do not modify!")
                 .build();
 
@@ -164,6 +170,10 @@ public final class PaprikaProcessor extends AbstractProcessor {
         }
 
         return "BLOB";
+    }
+
+    private String getPackageName(TypeElement type) {
+        return elementUtils.getPackageOf(type).getQualifiedName().toString();
     }
 
     private void error(Element element, String message, Object... args) {

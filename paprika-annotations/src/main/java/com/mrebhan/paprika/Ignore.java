@@ -1,4 +1,4 @@
-package com.mrebhan;
+package com.mrebhan.paprika;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -8,6 +8,5 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 
 @Retention(CLASS)
 @Target(FIELD)
-public @interface Unique {
+public @interface Ignore {
 }
-

@@ -1,14 +1,13 @@
-package com.mrebhan.paprika.data;
+package com.mrebhan.sample.data;
 
 import android.support.annotation.IntDef;
 
-import com.mrebhan.NonNull;
-import com.mrebhan.PrimaryKey;
-import com.mrebhan.Table;
-import com.mrebhan.Unique;
+import com.mrebhan.paprika.NonNull;
+import com.mrebhan.paprika.PrimaryKey;
+import com.mrebhan.paprika.Table;
+import com.mrebhan.paprika.Unique;
 
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 

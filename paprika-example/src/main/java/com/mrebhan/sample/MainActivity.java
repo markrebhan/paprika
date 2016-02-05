@@ -1,4 +1,4 @@
-package com.mrebhan.paprika;
+package com.mrebhan.sample;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -6,6 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+
+import com.mrebhan.R;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
