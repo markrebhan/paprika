@@ -10,8 +10,10 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.io.IOException;
+import java.lang.annotation.ElementType;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -36,9 +38,16 @@ import static com.mrebhan.paprika.consts.Constants.PAPRIKA_PACKAGE;
 import static com.mrebhan.paprika.consts.Constants.PAPRIKA_SQL_SCRIPTS_CLASS_NAME;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
+//TODO add support for having _id in class or generate it 
+
 @AutoService(Processor.class)
 public final class PaprikaProcessor extends AbstractProcessor {
     private static final ClassName SQL_SCRIPTS = ClassName.get("com.mrebhan.paprika.internal", "SqlScripts");
+    private static final ClassName LIST = ClassName.get("java.util", "List");
+    private static final ClassName STRING = ClassName.get("java.lang", "String");
+    private static final ClassName ARRAY_LIST = ClassName.get("java.util", "ArrayList");
+    private static final ClassName CONTENT_VALUES = ClassName.get("android.content", "ContentValues");
+    private static final ClassName CURSOR = ClassName.get("android.database", "Cursor");
     private static final Map<String, String> COLUMN_MODIFIERS = new HashMap<>();
 
     static {
@@ -90,10 +99,7 @@ public final class PaprikaProcessor extends AbstractProcessor {
         TypeSpec.Builder builder = TypeSpec.classBuilder(PAPRIKA_SQL_SCRIPTS_CLASS_NAME).addModifiers(Modifier.PUBLIC)
                 .addSuperinterface(SQL_SCRIPTS);
 
-        ClassName list = ClassName.get("java.util", "List");
-        ClassName string = ClassName.get("java.lang", "String");
-        ClassName arrayList = ClassName.get("java.util", "ArrayList");
-        TypeName listOfString = ParameterizedTypeName.get(list, string);
+        TypeName listOfString = ParameterizedTypeName.get(LIST, STRING);
 
         MethodSpec.Builder createMethod = MethodSpec.methodBuilder("getCreateScripts")
                 .addModifiers(Modifier.PUBLIC)
@@ -101,30 +107,20 @@ public final class PaprikaProcessor extends AbstractProcessor {
                 .returns(listOfString);
 
         //add a list of strings
-        createMethod.addStatement("$T statements = new $T<>()", listOfString, arrayList);
+        createMethod.addStatement("$T statements = new $T<>()", listOfString, ARRAY_LIST);
 
         for (Element element : roundEnv.getElementsAnnotatedWith(Table.class)) {
-            // create a table
-            StringBuilder stringBuilder = new StringBuilder("CREATE TABLE " + element.getSimpleName() + "( ");
+
+            Map<String, Element> elementMappers = new LinkedHashMap<>();
 
             for (Element classElement : element.getEnclosedElements()) {
-                if (classElement.getKind() == ElementKind.FIELD) {
-                    // add field to table
-                    if (!classElement.getModifiers().contains(Modifier.STATIC)) {
-                        stringBuilder.append(classElement.getSimpleName()).
-                                append(" ").
-                                append(getDataType(classElement)).
-                                append(" ");
-
-                        addSqlModifiers(stringBuilder, classElement);
-                        stringBuilder.append(", ");
-                    }
+                if (classElement.getKind() == ElementKind.FIELD && !classElement.getModifiers().contains(Modifier.STATIC)) {
+                    elementMappers.put(classElement.getSimpleName().toString(), classElement);
                 }
             }
 
-            stringBuilder.replace(stringBuilder.length() - 2, stringBuilder.length(), ")");
-
-            createMethod.addStatement("statements.add(\"" + stringBuilder.toString() + "\")");
+            buildCreateScript(elementMappers, element, createMethod);
+            buildMapperClass(elementMappers, element);
         }
 
         createMethod.addStatement("return statements");
@@ -142,6 +138,78 @@ public final class PaprikaProcessor extends AbstractProcessor {
 
         return true;
     }
+
+    private void buildCreateScript(Map<String, Element> elementMap, Element parent, MethodSpec.Builder createMethod) {
+        // create a table
+        StringBuilder stringBuilder = new StringBuilder("CREATE TABLE " + parent.getSimpleName() + "( ");
+
+        for (String key : elementMap.keySet()) {
+            Element element = elementMap.get(key);
+            stringBuilder.append(key).
+                    append(" ").
+                    append(getDataType(element)).
+                    append(" ");
+
+            addSqlModifiers(stringBuilder, element);
+            stringBuilder.append(", ");
+        }
+
+        stringBuilder.replace(stringBuilder.length() - 2, stringBuilder.length(), ")");
+
+        createMethod.addStatement("statements.add(\"" + stringBuilder.toString() + "\")");
+    }
+
+    private void buildMapperClass(Map<String, Element> elementMap, Element parent) {
+        String packageName = getPackageName(parent);
+        String className = getClassName(parent, packageName) + "$$PaprikaMapper";
+        TypeSpec.Builder builder = TypeSpec.classBuilder(className)
+                .superclass(ClassName.get((TypeElement) parent));
+
+        builder.addMethod(buildModelConstructor(elementMap));
+        builder.addMethod(buildContentValuesMethod(elementMap));
+
+        JavaFile javaFile = JavaFile.builder(packageName, builder.build())
+                .addFileComment("Code Generated for Paprika. Do not modify!")
+                .build();
+
+        try {
+            javaFile.writeTo(filer);
+        } catch (IOException e) {
+            error(null, "Unable to write create script: %s", e.getMessage());
+        }
+    }
+
+    private MethodSpec buildContentValuesMethod(Map<String, Element> elementMap) {
+        MethodSpec.Builder getContentResolverMethod = MethodSpec.methodBuilder("getContentResolver")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(CONTENT_VALUES);
+
+        getContentResolverMethod.addStatement("$T contentValues = new $T()", CONTENT_VALUES, CONTENT_VALUES);
+
+        for (String key : elementMap.keySet()) {
+            getContentResolverMethod.addStatement("contentValues.put($S,$L)", key, key);
+        }
+
+        getContentResolverMethod.addStatement("return contentValues");
+
+        return getContentResolverMethod.build();
+    }
+
+    private MethodSpec buildModelConstructor(Map<String, Element> elementMap) {
+        MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(CURSOR, "cursor");
+
+        int index = 0;
+        for (String key : elementMap.keySet()) {
+            Element element = elementMap.get(key);
+            constructor.addStatement("$L = cursor.$L($L)", key, getCursorMethod(element), index);
+            index++;
+        }
+
+        return constructor.build();
+    }
+
 
     private void addSqlModifiers(StringBuilder stringBuilder, Element element) {
 
@@ -172,8 +240,31 @@ public final class PaprikaProcessor extends AbstractProcessor {
         return "BLOB";
     }
 
-    private String getPackageName(TypeElement type) {
-        return elementUtils.getPackageOf(type).getQualifiedName().toString();
+    private String getCursorMethod(Element element) {
+        HashSet<Element> elements = new HashSet<>();
+        elements.add(element);
+        Set<VariableElement> fields = ElementFilter.fieldsIn(elements);
+        TypeMirror fieldType = fields.iterator().next().asType();
+        String className = fieldType.toString();
+
+        if (className.equals(int.class.getName())) {
+            return "getInt";
+        } else if (className.equals(long.class.getName())) {
+            return "getLong";
+        } else if (className.equals(String.class.getName())) {
+            return "getString";
+        }
+
+        return "getBlob";
+    }
+
+    private String getPackageName(Element element) {
+        return elementUtils.getPackageOf(element).getQualifiedName().toString();
+    }
+
+    private String getClassName(Element element, String packageName) {
+        int packageLen = packageName.length() + 1;
+        return ((TypeElement) element).getQualifiedName().toString().substring(packageLen).replace('.', '$');
     }
 
     private void error(Element element, String message, Object... args) {
