@@ -12,6 +12,7 @@ import static com.mrebhan.paprika.consts.Constants.PAPRIKA_SQL_SCRIPTS_CLASS_NAM
 public class PaprikaDataHelper extends SQLiteOpenHelper {
 
     private SqlScripts sqlScripts;
+    private SQLiteDatabase writableDatabase;
 
     public PaprikaDataHelper(Context context, String name, int version) {
         super(context, name, null, version);
@@ -39,5 +40,14 @@ public class PaprikaDataHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
+    }
+
+    @Override
+    public SQLiteDatabase getWritableDatabase() {
+        if (writableDatabase == null) {
+            writableDatabase = super.getWritableDatabase();
+        }
+
+        return writableDatabase;
     }
 }

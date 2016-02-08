@@ -2,54 +2,84 @@ package com.mrebhan.sample;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
+import android.widget.TextView;
 
 import com.mrebhan.R;
+import com.mrebhan.paprika.Paprika;
+import com.mrebhan.sample.data.Spice;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
-import butterknife.OnItemClick;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    @Bind(R.id.list)
-    ListView listView;
+    RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
 
-        listView.setAdapter(new BaseAdapter() {
-            @Override
-            public int getCount() {
-                return 0;
-            }
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        Adapter adapter = new Adapter();
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-            @Override
-            public Object getItem(int position) {
-                return null;
-            }
+        List<Spice> spices = Paprika.getList(Spice.class);
 
-            @Override
-            public long getItemId(int position) {
-                return 0;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                return null;
-            }
-        });
+        adapter.addSpices(spices);
     }
 
-    @OnItemClick(R.id.list)
-    public void onCLick() {
+    private static class Adapter extends RecyclerView.Adapter<ViewHolder> {
 
+        private List<Spice> spiceList = new ArrayList<>();
+
+        public void addSpices(List<Spice> spices) {
+            spiceList.clear();
+            spiceList.addAll(spices);
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.row_spice, parent, false));
+        }
+
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            holder.bind(spiceList.get(position));
+        }
+
+        @Override
+        public int getItemCount() {
+            return spiceList.size();
+        }
     }
-}
+
+
+    private static class ViewHolder extends RecyclerView.ViewHolder {
+
+        private TextView name;
+        private TextView flavor;
+        private TextView tastiness;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+            name = (TextView) itemView.findViewById(R.id.name);
+            flavor = (TextView) itemView.findViewById(R.id.flavor);
+            tastiness = (TextView) itemView.findViewById(R.id.tastiness);
+        }
+
+        public void bind(Spice spice) {
+            name.setText(spice.getName());
+            flavor.setText(spice.getFlavor());
+            tastiness.setText(spice.getTastiness());
+        }
+    }
+ }

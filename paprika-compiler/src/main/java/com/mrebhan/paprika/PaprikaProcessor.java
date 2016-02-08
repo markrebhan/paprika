@@ -1,7 +1,6 @@
 package com.mrebhan.paprika;
 
 import com.google.auto.service.AutoService;
-import com.mrebhan.paprika.consts.Constants;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -10,7 +9,6 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.io.IOException;
-import java.lang.annotation.ElementType;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -36,13 +34,15 @@ import javax.lang.model.util.Types;
 
 import static com.mrebhan.paprika.consts.Constants.PAPRIKA_PACKAGE;
 import static com.mrebhan.paprika.consts.Constants.PAPRIKA_SQL_SCRIPTS_CLASS_NAME;
+import static com.mrebhan.paprika.consts.Constants.PAPRIKA_MAPPER_SUFFIX;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-//TODO add support for having _id in class or generate it 
+//TODO add support for having _id in class or generate it
 
 @AutoService(Processor.class)
 public final class PaprikaProcessor extends AbstractProcessor {
     private static final ClassName SQL_SCRIPTS = ClassName.get("com.mrebhan.paprika.internal", "SqlScripts");
+    private static final ClassName PAPRIKA_MAPPER = ClassName.get("com.mrebhan.paprika.internal", "PaprikaMapper");
     private static final ClassName LIST = ClassName.get("java.util", "List");
     private static final ClassName STRING = ClassName.get("java.lang", "String");
     private static final ClassName ARRAY_LIST = ClassName.get("java.util", "ArrayList");
@@ -96,7 +96,7 @@ public final class PaprikaProcessor extends AbstractProcessor {
 
         isProcessed = true;
 
-        TypeSpec.Builder builder = TypeSpec.classBuilder(PAPRIKA_SQL_SCRIPTS_CLASS_NAME).addModifiers(Modifier.PUBLIC)
+        TypeSpec.Builder builder = TypeSpec.classBuilder(PAPRIKA_SQL_SCRIPTS_CLASS_NAME).addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addSuperinterface(SQL_SCRIPTS);
 
         TypeName listOfString = ParameterizedTypeName.get(LIST, STRING);
@@ -161,11 +161,15 @@ public final class PaprikaProcessor extends AbstractProcessor {
 
     private void buildMapperClass(Map<String, Element> elementMap, Element parent) {
         String packageName = getPackageName(parent);
-        String className = getClassName(parent, packageName) + "$$PaprikaMapper";
+        String className = getClassName(parent, packageName) + PAPRIKA_MAPPER_SUFFIX;
+        TypeMirror type = parent.asType();
         TypeSpec.Builder builder = TypeSpec.classBuilder(className)
-                .superclass(ClassName.get((TypeElement) parent));
+                .superclass(ClassName.get((TypeElement) parent))
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addSuperinterface(ParameterizedTypeName.get(PAPRIKA_MAPPER, TypeName.get(type)));
 
-        builder.addMethod(buildModelConstructor(elementMap));
+        builder.addMethod(buildSetupModelCopyMethod(elementMap, type));
+        builder.addMethod(buildSetupModelCursorMethod(elementMap));
         builder.addMethod(buildContentValuesMethod(elementMap));
 
         JavaFile javaFile = JavaFile.builder(packageName, builder.build())
@@ -180,8 +184,9 @@ public final class PaprikaProcessor extends AbstractProcessor {
     }
 
     private MethodSpec buildContentValuesMethod(Map<String, Element> elementMap) {
-        MethodSpec.Builder getContentResolverMethod = MethodSpec.methodBuilder("getContentResolver")
+        MethodSpec.Builder getContentResolverMethod = MethodSpec.methodBuilder("getContentValues")
                 .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
                 .returns(CONTENT_VALUES);
 
         getContentResolverMethod.addStatement("$T contentValues = new $T()", CONTENT_VALUES, CONTENT_VALUES);
@@ -195,19 +200,34 @@ public final class PaprikaProcessor extends AbstractProcessor {
         return getContentResolverMethod.build();
     }
 
-    private MethodSpec buildModelConstructor(Map<String, Element> elementMap) {
-        MethodSpec.Builder constructor = MethodSpec.constructorBuilder()
+    private MethodSpec buildSetupModelCursorMethod(Map<String, Element> elementMap) {
+        MethodSpec.Builder setupModel = MethodSpec.methodBuilder("setupModel")
                 .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
                 .addParameter(CURSOR, "cursor");
 
         int index = 0;
         for (String key : elementMap.keySet()) {
             Element element = elementMap.get(key);
-            constructor.addStatement("$L = cursor.$L($L)", key, getCursorMethod(element), index);
+            setupModel.addStatement("$L = cursor.$L($L)", key, getCursorMethod(element), index);
             index++;
         }
 
-        return constructor.build();
+        return setupModel.build();
+    }
+
+    private MethodSpec buildSetupModelCopyMethod(Map<String, Element> elementMap, TypeMirror type) {
+        MethodSpec.Builder setupModel = MethodSpec.methodBuilder("setupModel")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .addParameter(TypeName.get(type), "model");
+
+
+        for (String key : elementMap.keySet()) {
+            setupModel.addStatement("$L = model.$L", key, key);
+        }
+
+        return setupModel.build();
     }
 
 

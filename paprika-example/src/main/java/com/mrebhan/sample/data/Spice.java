@@ -14,11 +14,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Table(version = 1)
 public class Spice {
 
-    private static final int SWEET = 0;
-    private static final int SOUR = 1;
-    private static final int BITTER = 2;
-    private static final int SPICY = 3;
-    private static final int SAVORY = 4;
+    public static final int SWEET = 0;
+    public static final int SOUR = 1;
+    public static final int BITTER = 2;
+    public static final int SPICY = 3;
+    public static final int SAVORY = 4;
 
     @Retention(RUNTIME)
     @IntDef({SWEET, SOUR, BITTER, SPICY, SAVORY})
@@ -50,5 +50,21 @@ public class Spice {
 
     public int getTastiness() {
         return tastiness;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setFlavor(int flavor) {
+        this.flavor = flavor;
+    }
+
+    public void setTastiness(int tastiness) {
+        this.tastiness = tastiness;
     }
 }
