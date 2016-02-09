@@ -141,7 +141,8 @@ public final class PaprikaProcessor extends AbstractProcessor {
 
     private void buildCreateScript(Map<String, Element> elementMap, Element parent, MethodSpec.Builder createMethod) {
         // create a table
-        StringBuilder stringBuilder = new StringBuilder("CREATE TABLE " + parent.getSimpleName() + "( ");
+        // TODO figure out if the table needs the _id
+        StringBuilder stringBuilder = new StringBuilder("CREATE TABLE " + parent.getSimpleName() + "(_ID INTEGER PRIMARY KEY AUTOINCREMENT, ");
 
         for (String key : elementMap.keySet()) {
             Element element = elementMap.get(key);
@@ -206,7 +207,8 @@ public final class PaprikaProcessor extends AbstractProcessor {
                 .addAnnotation(Override.class)
                 .addParameter(CURSOR, "cursor");
 
-        int index = 0;
+        //TODO adjust index based on if table has _id or not
+        int index = 1;
         for (String key : elementMap.keySet()) {
             Element element = elementMap.get(key);
             setupModel.addStatement("$L = cursor.$L($L)", key, getCursorMethod(element), index);

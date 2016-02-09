@@ -8,16 +8,16 @@ import android.database.sqlite.SQLiteDatabase;
 import com.mrebhan.paprika.internal.PaprikaMapper;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 import static com.mrebhan.paprika.consts.Constants.PAPRIKA_MAPPER_SUFFIX;
 
 public final class Paprika {
 
     private static PaprikaDataHelper dataHelper;
-    private static final Map<Class, Class> CLASS_TO_SUPER_MAP = new HashMap<>();
+    private static final Map<Class, Class> CLASS_TO_SUPER_MAP = new WeakHashMap<>();
 
     public Paprika() {
     }
@@ -55,9 +55,7 @@ public final class Paprika {
 
         SQLiteDatabase db = dataHelper.getWritableDatabase();
 
-        db.beginTransaction();
         db.insertWithOnConflict(data.getClass().getSimpleName(), null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
-        db.endTransaction();
 
         return mapperClass;
     }
@@ -68,9 +66,7 @@ public final class Paprika {
 
         SQLiteDatabase db = dataHelper.getWritableDatabase();
 
-        db.beginTransaction();
         Cursor cursor = db.query(objectClazz.getSimpleName(), null, null, null, null, null, null);
-        db.endTransaction();
 
         try {
             List<T> resultList = new ArrayList<>();

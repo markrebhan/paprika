@@ -1,10 +1,13 @@
 package com.mrebhan.sample;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -18,7 +21,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    RecyclerView recyclerView;
+    private RecyclerView recyclerView;
+    private Adapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,13 +31,33 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        Adapter adapter = new Adapter();
+        adapter = new Adapter();
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
         List<Spice> spices = Paprika.getList(Spice.class);
-
         adapter.addSpices(spices);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.add:
+                startActivity(new Intent(this, AddSpiceActivity.class));
+                return true;
+        }
+
+        return false;
     }
 
     private static class Adapter extends RecyclerView.Adapter<ViewHolder> {
@@ -78,8 +102,8 @@ public class MainActivity extends AppCompatActivity {
 
         public void bind(Spice spice) {
             name.setText(spice.getName());
-            flavor.setText(spice.getFlavor());
-            tastiness.setText(spice.getTastiness());
+            flavor.setText(spice.getFlavorString());
+            tastiness.setText(Integer.toString(spice.getTastiness()));
         }
     }
  }

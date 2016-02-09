@@ -1,5 +1,7 @@
 package com.mrebhan.sample.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.IntDef;
 
 import com.mrebhan.paprika.NonNull;
@@ -12,7 +14,7 @@ import java.lang.annotation.Retention;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Table(version = 1)
-public class Spice {
+public class Spice implements Parcelable {
 
     public static final int SWEET = 0;
     public static final int SOUR = 1;
@@ -24,9 +26,6 @@ public class Spice {
     @IntDef({SWEET, SOUR, BITTER, SPICY, SAVORY})
     public @interface Flavor{}
 
-    @PrimaryKey
-    long id;
-
     @NonNull
     @Unique
     String name;
@@ -36,35 +35,76 @@ public class Spice {
 
     int tastiness;
 
-    public long getId() {
-        return id;
-    }
-
     public String getName() {
         return name;
-    }
-
-    public int getFlavor() {
-        return flavor;
-    }
-
-    public int getTastiness() {
-        return tastiness;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
+    public int getFlavor() {
+        return flavor;
+    }
+
     public void setFlavor(int flavor) {
         this.flavor = flavor;
+    }
+
+    public int getTastiness() {
+        return tastiness;
     }
 
     public void setTastiness(int tastiness) {
         this.tastiness = tastiness;
     }
+
+    public String getFlavorString() {
+        switch (flavor) {
+            case SWEET:
+                return "Sweet";
+            case SOUR:
+                return "Sour";
+            case BITTER:
+                return "Bitter";
+            case SPICY:
+                return "Spicy";
+            case SAVORY:
+                return "Savory";
+        }
+
+        return null;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.name);
+        dest.writeInt(this.flavor);
+        dest.writeInt(this.tastiness);
+    }
+
+    public Spice() {
+    }
+
+    @SuppressWarnings("ResourceType")
+    protected Spice(Parcel in) {
+        this.name = in.readString();
+        this.flavor = in.readInt();
+        this.tastiness = in.readInt();
+    }
+
+    public static final Creator<Spice> CREATOR = new Creator<Spice>() {
+        public Spice createFromParcel(Parcel source) {
+            return new Spice(source);
+        }
+
+        public Spice[] newArray(int size) {
+            return new Spice[size];
+        }
+    };
 }
