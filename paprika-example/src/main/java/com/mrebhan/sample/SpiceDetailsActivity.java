@@ -51,7 +51,7 @@ public class SpiceDetailsActivity extends AppCompatActivity {
                 spice.setName(name.getText().toString());
 
                 if (spice.getName() != null) {
-                    Paprika.save(spice);
+                    Paprika.createOrUpdate(spice, spice.getId());
                     startActivity(new Intent(SpiceDetailsActivity.this, MainActivity.class));
                 }
             }

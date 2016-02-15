@@ -34,7 +34,7 @@ public final class Paprika {
      * @param data
      * @return
      */
-    public static Object save(Object data) {
+    public static Object create(Object data) {
 
         final PaprikaMapper mapperClass;
 
@@ -59,6 +59,40 @@ public final class Paprika {
         db.insertWithOnConflict(getTableName(data.getClass()), null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
 
         return mapperClass;
+    }
+
+    public static Object update(Object data, long id) {
+        final PaprikaMapper mapperClass;
+
+        if (isSuperClass(data.getClass())) {
+            mapperClass = (PaprikaMapper) data;
+        } else {
+            final Class superClass = findMapperClass(data.getClass());
+
+            try {
+                mapperClass = (PaprikaMapper) superClass.newInstance();
+                mapperClass.setupModel(data);
+
+            } catch (Exception e) {
+                throw new IllegalArgumentException(e.getMessage());
+            }
+        }
+
+        ContentValues contentValues = mapperClass.getContentValues();
+
+        SQLiteDatabase db = dataHelper.getWritableDatabase();
+
+        db.update(getTableName(data.getClass()), contentValues, "_id = ?", new String[]{Long.toString(id)});
+
+        return mapperClass;
+    }
+
+    public static Object createOrUpdate(Object data, long id) {
+        if (id <= 0) {
+            return create(data);
+        } else {
+            return update(data, id);
+        }
     }
 
     public static <T> T get(Class<T> objectClazz, long id) {
@@ -93,12 +127,16 @@ public final class Paprika {
     }
 
     public static <T> List<T> getList(Class<T> objectClazz) {
+        return getList(objectClazz, null, null, null);
+    }
 
+    // TODO add query builder maybe
+    public static <T> List<T> getList(Class<T> objectClazz, String selection, String[] selectionArgs, String orderBy) {
         Class superClass = findMapperClass(objectClazz);
 
         SQLiteDatabase db = dataHelper.getWritableDatabase();
 
-        Cursor cursor = db.query(getTableName(objectClazz), null, null, null, null, null, null);
+        Cursor cursor = db.query(getTableName(objectClazz), null, selection, selectionArgs, null, null, orderBy);
 
         try {
             List<T> resultList = new ArrayList<>();
