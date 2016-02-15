@@ -53,14 +53,14 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.add:
-                startActivity(new Intent(this, AddSpiceActivity.class));
+                startActivity(SpiceDetailsActivity.getIntent(this));
                 return true;
         }
 
         return false;
     }
 
-    private static class Adapter extends RecyclerView.Adapter<ViewHolder> {
+    private class Adapter extends RecyclerView.Adapter<ViewHolder> {
 
         private List<Spice> spiceList = new ArrayList<>();
 
@@ -86,8 +86,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-    private static class ViewHolder extends RecyclerView.ViewHolder {
+    private class ViewHolder extends RecyclerView.ViewHolder {
 
         private TextView name;
         private TextView flavor;
@@ -100,10 +99,16 @@ public class MainActivity extends AppCompatActivity {
             tastiness = (TextView) itemView.findViewById(R.id.tastiness);
         }
 
-        public void bind(Spice spice) {
+        public void bind(final Spice spice) {
             name.setText(spice.getName());
             flavor.setText(spice.getFlavorString());
             tastiness.setText(Integer.toString(spice.getTastiness()));
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startActivity(SpiceDetailsActivity.getIntent(itemView.getContext(), spice.getId()));
+                }
+            });
         }
     }
  }

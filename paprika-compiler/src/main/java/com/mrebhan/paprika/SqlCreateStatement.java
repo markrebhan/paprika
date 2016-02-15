@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.lang.model.element.Element;
 
+import static com.mrebhan.paprika.Column.FLAG_PRIMARY_KEY;
+
 public final class SqlCreateStatement {
 
     private List<Column> columns;
@@ -16,11 +18,24 @@ public final class SqlCreateStatement {
 
         columns = new ArrayList<>();
 
-        // TODO move this
-        columns.add(Column.createID());
+        boolean primaryKeyUsed = false;
 
         for (String key : elementMap.keySet()) {
-            columns.add(new Column(elementMap.get(key)));
+            Column column = new Column(elementMap.get(key));
+
+            if ((column.flags & FLAG_PRIMARY_KEY) != 0) {
+                if (!primaryKeyUsed) {
+                    primaryKeyUsed = true;
+                } else {
+                    throw new IllegalArgumentException("You can only specify one primary key! table = " + tableName);
+                }
+            }
+
+            columns.add(column);
+        }
+
+        if (!primaryKeyUsed) {
+            throw new IllegalArgumentException("Please specify a primary key! table = " + tableName);
         }
     }
 

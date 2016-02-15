@@ -16,7 +16,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".sample.AddSpiceActivity"/>
+        <activity android:name=".sample.SpiceDetailsActivity"/>
 
     </application>
 

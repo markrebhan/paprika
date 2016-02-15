@@ -26,6 +26,9 @@ public class Spice implements Parcelable {
     @IntDef({SWEET, SOUR, BITTER, SPICY, SAVORY})
     public @interface Flavor{}
 
+    @PrimaryKey
+    long id;
+
     @NonNull
     @Unique
     String name;
@@ -34,6 +37,14 @@ public class Spice implements Parcelable {
     int flavor;
 
     int tastiness;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;

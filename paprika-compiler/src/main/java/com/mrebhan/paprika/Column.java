@@ -54,14 +54,6 @@ public final class Column {
         setupFlags(element);
     }
 
-    public static Column createID() {
-        Column column = new Column();
-        column.name = "ID";
-        column.dataType = "INTEGER";
-        column.flags = FLAG_PRIMARY_KEY | FLAG_AUTOINCREMENT;
-        return column;
-    }
-
     private void setupDataType(Element element) {
 
         TypeKind kind = element.asType().getKind();
@@ -91,7 +83,9 @@ public final class Column {
             } else if (Unique.class.getName().equals(modifier)) {
                 flags |= FLAG_UNIQUE;
             } else if (PrimaryKey.class.getName().equals(modifier)) {
-                flags |= FLAG_PRIMARY_KEY;
+                // TODO do not force auto autoincrement here
+                flags |= FLAG_PRIMARY_KEY | FLAG_AUTOINCREMENT;
+                name = "_id";
             } else if (Ignore.class.getName().equals(modifier)) {
                 flags = -1;
             }

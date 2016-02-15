@@ -82,7 +82,10 @@ public final class MapperClassBuilder {
         getContentResolverMethod.addStatement("$T contentValues = new $T()", CONTENT_VALUES, CONTENT_VALUES);
 
         for (String key : elementMap.keySet()) {
-            getContentResolverMethod.addStatement("contentValues.put($S,$L)", key, key);
+            // TODO only for autoincrement
+            if (elementMap.get(key).getAnnotation(PrimaryKey.class) == null) {
+                getContentResolverMethod.addStatement("contentValues.put($S,$L)", key, key);
+            }
         }
 
         getContentResolverMethod.addStatement("return contentValues");
@@ -96,8 +99,7 @@ public final class MapperClassBuilder {
                 .addAnnotation(Override.class)
                 .addParameter(CURSOR, "cursor");
 
-        //TODO adjust index based on if table has _id or not
-        int index = 1;
+        int index = 0;
         for (String key : elementMap.keySet()) {
             Element element = elementMap.get(key);
             setupModel.addStatement("$L = cursor.$L($L)", key, getCursorMethod(element), index);

@@ -36,12 +36,13 @@ public final class Paprika {
      */
     public static Object save(Object data) {
 
-        Class superClass = findMapperClass(data.getClass());
-        PaprikaMapper mapperClass;
+        final PaprikaMapper mapperClass;
 
-        if (data.getClass().getName().equals(superClass.getClass().getName())) {
+        if (isSuperClass(data.getClass())) {
             mapperClass = (PaprikaMapper) data;
         } else {
+            final Class superClass = findMapperClass(data.getClass());
+
             try {
                 mapperClass = (PaprikaMapper) superClass.newInstance();
                 mapperClass.setupModel(data);
@@ -55,9 +56,40 @@ public final class Paprika {
 
         SQLiteDatabase db = dataHelper.getWritableDatabase();
 
-        db.insertWithOnConflict(data.getClass().getSimpleName(), null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
+        db.insertWithOnConflict(getTableName(data.getClass()), null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
 
         return mapperClass;
+    }
+
+    public static <T> T get(Class<T> objectClazz, long id) {
+        Class superClass = findMapperClass(objectClazz);
+
+        SQLiteDatabase db = dataHelper.getWritableDatabase();
+
+        // TODO add dynamic ID in mapper class
+        Cursor cursor = db.query(getTableName(objectClazz), null, "_id = ?", new String[]{Long.toString(id)}, null, null, null);
+
+        try {
+            T item = null;
+
+            if (cursor.getCount() > 0 && !cursor.isClosed()) {
+                cursor.moveToFirst();
+
+                try {
+                    PaprikaMapper mapper = (PaprikaMapper) superClass.newInstance();
+                    mapper.setupModel(cursor);
+                    item = (T) mapper;
+
+                } catch (Exception e) {
+                    throw new IllegalArgumentException(e.getMessage());
+                }
+
+            }
+            return item;
+
+        } finally {
+            cursor.close();
+        }
     }
 
     public static <T> List<T> getList(Class<T> objectClazz) {
@@ -66,7 +98,7 @@ public final class Paprika {
 
         SQLiteDatabase db = dataHelper.getWritableDatabase();
 
-        Cursor cursor = db.query(objectClazz.getSimpleName(), null, null, null, null, null, null);
+        Cursor cursor = db.query(getTableName(objectClazz), null, null, null, null, null, null);
 
         try {
             List<T> resultList = new ArrayList<>();
@@ -94,7 +126,22 @@ public final class Paprika {
         }
     }
 
+    public static <T> void delete(Class<T> objectClazz, long id) {
+        SQLiteDatabase db = dataHelper.getWritableDatabase();
+
+        db.delete(getTableName(objectClazz), "_id = ?", new String[]{Long.toString(id)});
+    }
+
+    private static boolean isSuperClass(Class clazz) {
+        return clazz.getName().contains(PAPRIKA_MAPPER_SUFFIX);
+    }
+
+    private static String getTableName(Class clazz) {
+        return clazz.getSimpleName().replace(PAPRIKA_MAPPER_SUFFIX, "");
+    }
+
     private static <T> Class<? extends T> findMapperClass(Class<T> dataClass)  {
+
         Class<? extends T> mappedSuperClass = CLASS_TO_SUPER_MAP.get(dataClass);
 
         if (mappedSuperClass == null) {
