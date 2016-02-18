@@ -17,7 +17,7 @@ import static com.mrebhan.paprika.consts.Constants.PAPRIKA_MAPPER_SUFFIX;
 public final class Paprika {
 
     private static PaprikaDataHelper dataHelper;
-    private static final Map<Class, Class> CLASS_TO_SUPER_MAP = new WeakHashMap<>();
+    private static final Map<Class, Class> CLASS_TO_PAPRIKA_MAP = new WeakHashMap<>();
 
     public Paprika() {
     }
@@ -180,21 +180,18 @@ public final class Paprika {
 
     private static <T> Class<? extends T> findMapperClass(Class<T> dataClass)  {
 
-        Class<? extends T> mappedSuperClass = CLASS_TO_SUPER_MAP.get(dataClass);
+        Class<? extends T> mappedSuperClass = CLASS_TO_PAPRIKA_MAP.get(dataClass);
 
         if (mappedSuperClass == null) {
             try {
                 Class<?> findClass = Class.forName(dataClass.getName() + PAPRIKA_MAPPER_SUFFIX);
                 mappedSuperClass = (Class<? extends T>) findClass;
-                CLASS_TO_SUPER_MAP.put(dataClass, mappedSuperClass);
+                CLASS_TO_PAPRIKA_MAP.put(dataClass, mappedSuperClass);
             } catch (ClassNotFoundException e) {
                 throw new ClassCastException(e.getMessage());
             }
         }
         return mappedSuperClass;
     }
-
-
-
 
 }

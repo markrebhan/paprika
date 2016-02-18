@@ -9,4 +9,5 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 @Retention(CLASS)
 @Target(FIELD)
 public @interface PrimaryKey {
+    int version() default 1;
 }

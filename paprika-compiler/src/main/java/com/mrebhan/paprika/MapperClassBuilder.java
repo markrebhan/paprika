@@ -35,7 +35,7 @@ public final class MapperClassBuilder {
         put("java.lang.String", "getString");
         put("java.lang.Float", "getFloat");
         put("java.lang.Double", "getDouble");
-        put("java.lang.Boolean", "getBoolean");
+        put("java.lang.Boolean", "getInt");
     }};
 
     private static final Map<TypeKind, String> CURSOR_METHOD_MAP_PRIMITIVE = new HashMap<TypeKind, String>() {{
@@ -44,7 +44,7 @@ public final class MapperClassBuilder {
         put(LONG, "getLong");
         put(FLOAT, "getFloat");
         put(DOUBLE, "getDouble");
-        put(BOOLEAN, "getBoolean");
+        put(BOOLEAN, "getInt");
     }};
 
 

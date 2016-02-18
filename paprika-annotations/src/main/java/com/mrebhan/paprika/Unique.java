@@ -9,5 +9,6 @@ import static java.lang.annotation.RetentionPolicy.CLASS;
 @Retention(CLASS)
 @Target(FIELD)
 public @interface Unique {
+    int version() default 1;
 }
 
