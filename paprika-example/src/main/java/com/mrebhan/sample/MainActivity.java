@@ -89,18 +89,27 @@ public class MainActivity extends AppCompatActivity {
     private class ViewHolder extends RecyclerView.ViewHolder {
 
         private TextView name;
+        private TextView description;
         private TextView flavor;
         private TextView tastiness;
 
         public ViewHolder(View itemView) {
             super(itemView);
             name = (TextView) itemView.findViewById(R.id.name);
+            description = (TextView) itemView.findViewById(R.id.description);
             flavor = (TextView) itemView.findViewById(R.id.flavor);
             tastiness = (TextView) itemView.findViewById(R.id.tastiness);
         }
 
         public void bind(final Spice spice) {
             name.setText(spice.getName());
+            final String descriptionString = spice.getDescription();
+            if (descriptionString != null && !descriptionString.isEmpty()) {
+                description.setText(descriptionString);
+                description.setVisibility(View.VISIBLE);
+            } else {
+                description.setVisibility(View.GONE);
+            }
             flavor.setText(spice.getFlavorString());
             tastiness.setText(Integer.toString(spice.getTastiness()));
             itemView.setOnClickListener(new View.OnClickListener() {

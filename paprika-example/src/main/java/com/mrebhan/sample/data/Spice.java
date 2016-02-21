@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.IntDef;
 
+import com.mrebhan.paprika.Column;
 import com.mrebhan.paprika.NonNull;
 import com.mrebhan.paprika.PrimaryKey;
 import com.mrebhan.paprika.Table;
@@ -38,6 +39,9 @@ public class Spice implements Parcelable {
 
     int tastiness;
 
+    @Column(version = 3)
+    String description;
+
     public long getId() {
         return id;
     }
@@ -64,6 +68,14 @@ public class Spice implements Parcelable {
 
     public int getTastiness() {
         return tastiness;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public void setTastiness(int tastiness) {

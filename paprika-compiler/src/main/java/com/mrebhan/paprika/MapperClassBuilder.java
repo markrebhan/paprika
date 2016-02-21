@@ -1,5 +1,6 @@
 package com.mrebhan.paprika;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -60,7 +61,8 @@ public final class MapperClassBuilder {
         builder = TypeSpec.classBuilder(className)
                 .superclass(ClassName.get((TypeElement) parent))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addSuperinterface(ParameterizedTypeName.get(PAPRIKA_MAPPER, TypeName.get(type)));
+                .addSuperinterface(ParameterizedTypeName.get(PAPRIKA_MAPPER, TypeName.get(type)))
+                .addAnnotation(AnnotationSpec.builder(SuppressWarnings.class).addMember("value", "$S", "ParcelCreator").build());
 
         builder.addMethod(buildSetupModelCopyMethod(elementMap, type));
         builder.addMethod(buildSetupModelCursorMethod(elementMap));

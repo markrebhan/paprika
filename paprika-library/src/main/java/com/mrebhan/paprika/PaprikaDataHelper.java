@@ -6,6 +6,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.mrebhan.paprika.internal.SqlScripts;
 
+import java.util.List;
+import java.util.Map;
+
 import static com.mrebhan.paprika.consts.Constants.PAPRIKA_PACKAGE;
 import static com.mrebhan.paprika.consts.Constants.PAPRIKA_SQL_SCRIPTS_CLASS_NAME;
 
@@ -39,7 +42,14 @@ public class PaprikaDataHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        Map<Integer, List<String>> upgradeMap = sqlScripts.getUpgradeScripts();
+        for (int version : upgradeMap.keySet()) {
+            if (version > oldVersion) {
+                for (String script : upgradeMap.get(version)) {
+                    db.execSQL(script);
+                }
+            }
+        }
     }
 
     @Override

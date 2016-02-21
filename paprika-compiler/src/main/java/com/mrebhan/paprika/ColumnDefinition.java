@@ -14,7 +14,7 @@ import javax.lang.model.util.ElementFilter;
 
 import static javax.lang.model.type.TypeKind.*;
 
-public final class Column {
+public final class ColumnDefinition {
 
     public static final int FLAG_NON_NULL = 1;
     public static final int FLAG_UNIQUE = 2;
@@ -45,10 +45,10 @@ public final class Column {
     private String dataType;
     public int flags;
 
-    private Column() {
+    private ColumnDefinition() {
     }
 
-    public Column(Element element) {
+    public ColumnDefinition(Element element) {
         this.name = element.getSimpleName().toString();
         setupDataType(element);
         setupFlags(element);
@@ -75,6 +75,12 @@ public final class Column {
     }
 
     private void setupFlags(Element element) {
+//        NonNull nonNull = element.getAnnotation(NonNull.class);
+//
+//        if (nonNull != null) {
+//            flags |= FLAG_NON_NULL;
+//        }
+
         for (AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
             String modifier = annotationMirror.toString().substring(1);
 

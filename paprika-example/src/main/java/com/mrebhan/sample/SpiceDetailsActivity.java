@@ -23,6 +23,7 @@ public class SpiceDetailsActivity extends AppCompatActivity {
     private static final String ARG_IS_EDIT = "SpiceDetailsActivity.isEdit";
 
     private EditText name;
+    private EditText description;
     private Button addButton;
 
     private Spice spice;
@@ -42,6 +43,7 @@ public class SpiceDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add);
 
         name = (EditText) findViewById(R.id.name);
+        description = (EditText) findViewById(R.id.description);
         addButton = (Button) findViewById(R.id.add_button);
 
         addButton.setOnClickListener(new View.OnClickListener() {
@@ -49,6 +51,7 @@ public class SpiceDetailsActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 spice.setName(name.getText().toString());
+                spice.setDescription(description.getText().toString());
 
                 if (spice.getName() != null) {
                     Paprika.createOrUpdate(spice, spice.getId());
@@ -72,6 +75,7 @@ public class SpiceDetailsActivity extends AppCompatActivity {
         }
 
         name.setText(spice.getName());
+        description.setText(spice.getDescription());
     }
 
     @Override

@@ -6,24 +6,34 @@ import java.util.Map;
 
 import javax.lang.model.element.Element;
 
-import static com.mrebhan.paprika.Column.FLAG_PRIMARY_KEY;
+import static com.mrebhan.paprika.ColumnDefinition.FLAG_PRIMARY_KEY;
 
 public final class SqlCreateStatement {
 
-    private List<Column> columns;
+    private List<ColumnDefinition> columnDefinitions;
     private String tableName;
 
-    public SqlCreateStatement(Map<String, Element> elementMap, Element parent) {
+    public SqlCreateStatement(Map<String, Element> elementMap, Element parent, SqlUpgradeScripts upgradeScripts) {
         this.tableName = parent.getSimpleName().toString();
 
-        columns = new ArrayList<>();
+        columnDefinitions = new ArrayList<>();
 
         boolean primaryKeyUsed = false;
 
         for (String key : elementMap.keySet()) {
-            Column column = new Column(elementMap.get(key));
+            Element element = elementMap.get(key);
+            ColumnDefinition columnDefinition = new ColumnDefinition(element);
 
-            if ((column.flags & FLAG_PRIMARY_KEY) != 0) {
+            Column column = element.getAnnotation(Column.class);
+
+            if (column != null && upgradeScripts != null) {
+                int version = column.version();
+                if (version > 1) {
+                    upgradeScripts.addAlterAddColumn(columnDefinition, tableName, version);
+                }
+            }
+
+            if ((columnDefinition.flags & FLAG_PRIMARY_KEY) != 0) {
                 if (!primaryKeyUsed) {
                     primaryKeyUsed = true;
                 } else {
@@ -31,7 +41,7 @@ public final class SqlCreateStatement {
                 }
             }
 
-            columns.add(column);
+            columnDefinitions.add(columnDefinition);
         }
 
         if (!primaryKeyUsed) {
@@ -44,8 +54,8 @@ public final class SqlCreateStatement {
 
         StringBuilder statement =  new StringBuilder("CREATE TABLE " + tableName + "( ");
 
-        for (Column column : columns) {
-            statement.append(column.toString());
+        for (ColumnDefinition columnDefinition : columnDefinitions) {
+            statement.append(columnDefinition.toString());
             statement.append(", ");
         }
 
