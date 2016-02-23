@@ -18,9 +18,9 @@ public class Protein implements Parcelable {
     @Unique
     String name;
     
-//    boolean isVegetarian;
-//
-//    boolean isPescetarian;
+    boolean isVegetarian;
+
+    boolean isPescetarian;
 
     int caloriesPerHundredGrams;
 
@@ -34,8 +34,8 @@ public class Protein implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(this.id);
         dest.writeString(this.name);
-//        dest.writeByte(isVegetarian ? (byte) 1 : (byte) 0);
-//        dest.writeByte(isPescetarian ? (byte) 1 : (byte) 0);
+        dest.writeByte(isVegetarian ? (byte) 1 : (byte) 0);
+        dest.writeByte(isPescetarian ? (byte) 1 : (byte) 0);
         dest.writeInt(this.caloriesPerHundredGrams);
     }
 
@@ -45,8 +45,8 @@ public class Protein implements Parcelable {
     protected Protein(Parcel in) {
         this.id = in.readLong();
         this.name = in.readString();
-//        this.isVegetarian = in.readByte() != 0;
-//        this.isPescetarian = in.readByte() != 0;
+        this.isVegetarian = in.readByte() != 0;
+        this.isPescetarian = in.readByte() != 0;
         this.caloriesPerHundredGrams = in.readInt();
     }
 

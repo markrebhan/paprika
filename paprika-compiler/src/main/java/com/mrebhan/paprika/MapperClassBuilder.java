@@ -48,7 +48,13 @@ public final class MapperClassBuilder {
         put(BOOLEAN, "getInt");
     }};
 
+    private static final Map<String, String> CURSOR_FORMAT_MAP = new HashMap<String, String>() {{
+        put("java.lang.Boolean", "$L = cursor.$L($L) != 0");
+    }};
 
+    private static final Map<TypeKind, String> CURSOR_FORMAT_MAP_PRIMITIVE = new HashMap<TypeKind, String>() {{
+        put(BOOLEAN, "$L = cursor.$L($L) != 0");
+    }};
 
     private final TypeSpec.Builder builder;
     private final String packageName;
@@ -104,7 +110,7 @@ public final class MapperClassBuilder {
         int index = 0;
         for (String key : elementMap.keySet()) {
             Element element = elementMap.get(key);
-            setupModel.addStatement("$L = cursor.$L($L)", key, getCursorMethod(element), index);
+            setupModel.addStatement(getCursorFormat(element), key, getCursorMethod(element), index);
             index++;
         }
 
@@ -125,8 +131,28 @@ public final class MapperClassBuilder {
         return setupModel.build();
     }
 
+    private String getCursorFormat(Element element) {
+        final TypeKind kind = element.asType().getKind();
+
+        final String format;
+
+        if (kind.isPrimitive()) {
+            format = CURSOR_FORMAT_MAP_PRIMITIVE.get(kind);
+        } else {
+            HashSet<Element> elements = new HashSet<>();
+            elements.add(element);
+            Set<VariableElement> fields = ElementFilter.fieldsIn(elements);
+            TypeMirror fieldType = fields.iterator().next().asType();
+            String className = fieldType.toString();
+
+            format = CURSOR_FORMAT_MAP.get(className);
+        }
+
+        return format != null ? format : "$L = cursor.$L($L)";
+    }
+
     private String getCursorMethod(Element element) {
-        TypeKind kind = element.asType().getKind();
+        final TypeKind kind = element.asType().getKind();
 
         final String method;
 
