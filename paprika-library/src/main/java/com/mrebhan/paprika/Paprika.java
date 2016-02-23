@@ -25,7 +25,7 @@ public final class Paprika {
     //TODO pass in name and version
     public static void init(Context context) {
         if (dataHelper == null) {
-            dataHelper = new PaprikaDataHelper(context, "paprika", 3);
+            dataHelper = new PaprikaDataHelper(context, "paprika", 4);
         }
     }
 

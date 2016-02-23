@@ -5,6 +5,7 @@ import android.os.Parcelable;
 import android.support.annotation.IntDef;
 
 import com.mrebhan.paprika.Column;
+import com.mrebhan.paprika.Default;
 import com.mrebhan.paprika.NonNull;
 import com.mrebhan.paprika.PrimaryKey;
 import com.mrebhan.paprika.Table;
@@ -41,6 +42,11 @@ public class Spice implements Parcelable {
 
     @Column(version = 3)
     String description;
+
+    @Column(version = 4)
+    @NonNull
+    @Default("0")
+    long updateTime;
 
     public long getId() {
         return id;
@@ -82,6 +88,14 @@ public class Spice implements Parcelable {
         this.tastiness = tastiness;
     }
 
+    public long getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(long updateTime) {
+        this.updateTime = updateTime;
+    }
+
     public String getFlavorString() {
         switch (flavor) {
             case SWEET:
@@ -109,6 +123,8 @@ public class Spice implements Parcelable {
         dest.writeString(this.name);
         dest.writeInt(this.flavor);
         dest.writeInt(this.tastiness);
+        dest.writeString(this.description);
+        dest.writeLong(this.updateTime);
     }
 
     public Spice() {
@@ -119,6 +135,8 @@ public class Spice implements Parcelable {
         this.name = in.readString();
         this.flavor = in.readInt();
         this.tastiness = in.readInt();
+        this.description = in.readString();
+        this.updateTime = in.readLong();
     }
 
     public static final Creator<Spice> CREATOR = new Creator<Spice>() {

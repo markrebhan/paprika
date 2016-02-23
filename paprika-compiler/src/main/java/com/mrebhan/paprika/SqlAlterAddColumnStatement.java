@@ -12,6 +12,6 @@ public final class SqlAlterAddColumnStatement {
 
     @Override
     public String toString() {
-        return "ALTER TABLE " + tableName + "ADD COLUMN " + column.toString();
+        return "ALTER TABLE " + tableName + " ADD COLUMN " + column.toString();
     }
 }

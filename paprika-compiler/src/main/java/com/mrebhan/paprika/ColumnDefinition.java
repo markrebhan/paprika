@@ -44,6 +44,7 @@ public final class ColumnDefinition {
     private String name;
     private String dataType;
     public int flags;
+    private String defaultValue;
 
     private ColumnDefinition() {
     }
@@ -52,6 +53,7 @@ public final class ColumnDefinition {
         this.name = element.getSimpleName().toString();
         setupDataType(element);
         setupFlags(element);
+        setupDefault(element);
     }
 
     private void setupDataType(Element element) {
@@ -75,12 +77,6 @@ public final class ColumnDefinition {
     }
 
     private void setupFlags(Element element) {
-//        NonNull nonNull = element.getAnnotation(NonNull.class);
-//
-//        if (nonNull != null) {
-//            flags |= FLAG_NON_NULL;
-//        }
-
         for (AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
             String modifier = annotationMirror.toString().substring(1);
 
@@ -95,6 +91,14 @@ public final class ColumnDefinition {
             } else if (Ignore.class.getName().equals(modifier)) {
                 flags = -1;
             }
+        }
+    }
+
+    private void setupDefault(Element element) {
+        Default defaultValue = element.getAnnotation(Default.class);
+
+        if (defaultValue != null) {
+            this.defaultValue = defaultValue.value();
         }
     }
 
@@ -131,7 +135,18 @@ public final class ColumnDefinition {
         if (flags == null) {
             return "";
         } else {
-            return name + " " + dataType + " " + flags;
+            StringBuilder stringBuilder = new StringBuilder(name);
+            stringBuilder.append(' ');
+            stringBuilder.append(dataType);
+            stringBuilder.append(' ');
+            stringBuilder.append(flags);
+
+            if (defaultValue != null) {
+                stringBuilder.append("DEFAULT ");
+                stringBuilder.append(defaultValue);
+            }
+
+            return stringBuilder.toString();
         }
     }
 }
