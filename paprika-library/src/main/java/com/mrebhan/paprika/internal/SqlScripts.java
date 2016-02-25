@@ -6,4 +6,5 @@ import java.util.Map;
 public interface SqlScripts {
     List<String> getCreateScripts();
     Map<Integer, List<String>> getUpgradeScripts();
+    int getVersion();
 }

@@ -75,7 +75,8 @@ public final class PaprikaProcessor extends AbstractProcessor {
         TypeSpec.Builder builder = TypeSpec.classBuilder(PAPRIKA_SQL_SCRIPTS_CLASS_NAME).addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addSuperinterface(SQL_SCRIPTS);
 
-        final SqlUpgradeScripts upgradeScripts = new SqlUpgradeScripts();
+        final Version versionChecker = new Version();
+        final SqlUpgradeScripts upgradeScripts = new SqlUpgradeScripts(versionChecker);
         final SqlCreateScripts createScripts = new SqlCreateScripts(upgradeScripts);
 
         for (Element element : roundEnv.getElementsAnnotatedWith(Table.class)) {
@@ -101,6 +102,7 @@ public final class PaprikaProcessor extends AbstractProcessor {
 
         builder.addMethod(createScripts.buildMethod());
         builder.addMethod(upgradeScripts.buildMethod());
+        builder.addMethod(versionChecker.buildMethod());
 
         JavaFile javaFile = JavaFile.builder(PAPRIKA_PACKAGE, builder.build())
                 .addFileComment("Code Generated for Paprika. Do not modify!")

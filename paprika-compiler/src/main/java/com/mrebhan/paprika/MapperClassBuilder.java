@@ -37,6 +37,7 @@ public final class MapperClassBuilder {
         put("java.lang.Float", "getFloat");
         put("java.lang.Double", "getDouble");
         put("java.lang.Boolean", "getInt");
+        put("byte[]", "getBlob");
     }};
 
     private static final Map<TypeKind, String> CURSOR_METHOD_MAP_PRIMITIVE = new HashMap<TypeKind, String>() {{
@@ -158,6 +159,11 @@ public final class MapperClassBuilder {
 
         if (kind.isPrimitive()) {
             method = CURSOR_METHOD_MAP_PRIMITIVE.get(kind);
+
+            if (method == null) {
+                throw new IllegalArgumentException("This type is currently not supported: " + kind);
+            }
+
         } else {
             HashSet<Element> elements = new HashSet<>();
             elements.add(element);
@@ -166,9 +172,14 @@ public final class MapperClassBuilder {
             String className = fieldType.toString();
 
             method = CURSOR_METHOD_MAP.get(className);
+
+            if (method == null) {
+                throw new IllegalArgumentException("This tpye is currently not supported: " + className);
+            }
+
         }
 
-        return method != null ? method : "getBlob";
+        return method;
     }
 
     private String getClassName(Element element, String packageName) {

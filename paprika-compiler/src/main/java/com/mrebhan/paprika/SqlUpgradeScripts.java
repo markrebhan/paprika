@@ -23,17 +23,23 @@ public final class SqlUpgradeScripts {
     private static final ClassName STRING = ClassName.get("java.lang", "String");
 
     private final Map<Integer, List<String>> upgradeScripts = new HashMap<>();
+    private final Version versionChecker;
+
+    public SqlUpgradeScripts(Version version) {
+        this.versionChecker = version;
+    }
 
     public void addUpgradeNewTable(Map<String, Element> elementMap, Element parent, int version) {
         String createScript =  new SqlCreateStatement(elementMap, parent, null).toString();
         addUpgradeScriptToMap(version, createScript);
+        versionChecker.updateMaxVersion(version);
     }
 
     public void addAlterAddColumn(ColumnDefinition columnDefinition, String table, int version) {
         String alterScript = new SqlAlterAddColumnStatement(columnDefinition, table).toString();
         addUpgradeScriptToMap(version, alterScript);
+        versionChecker.updateMaxVersion(version);
     }
-
 
     private void addUpgradeScriptToMap(int version, String script) {
 

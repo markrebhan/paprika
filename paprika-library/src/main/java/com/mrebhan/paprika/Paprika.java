@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.mrebhan.paprika.internal.PaprikaMapper;
+import com.mrebhan.paprika.internal.SqlScripts;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,8 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import static com.mrebhan.paprika.consts.Constants.PAPRIKA_MAPPER_SUFFIX;
+import static com.mrebhan.paprika.consts.Constants.PAPRIKA_PACKAGE;
+import static com.mrebhan.paprika.consts.Constants.PAPRIKA_SQL_SCRIPTS_CLASS_NAME;
 
 public final class Paprika {
 
@@ -23,9 +26,17 @@ public final class Paprika {
     }
 
     //TODO pass in name and version
-    public static void init(Context context) {
+    public static void init(Context context, String databaseName) {
         if (dataHelper == null) {
-            dataHelper = new PaprikaDataHelper(context, "paprika", 4);
+            try {
+
+                Class<?> sqlScriptBinder = Class.forName(PAPRIKA_PACKAGE + "." + PAPRIKA_SQL_SCRIPTS_CLASS_NAME);
+                SqlScripts sqlScripts = (SqlScripts) sqlScriptBinder.newInstance();
+                dataHelper = new PaprikaDataHelper(context, databaseName, sqlScripts);
+
+            } catch (Exception e) {
+                throw new NullPointerException(e.getMessage());
+            }
         }
     }
 

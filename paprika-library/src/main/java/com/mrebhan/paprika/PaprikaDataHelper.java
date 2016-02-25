@@ -14,23 +14,12 @@ import static com.mrebhan.paprika.consts.Constants.PAPRIKA_SQL_SCRIPTS_CLASS_NAM
 
 public class PaprikaDataHelper extends SQLiteOpenHelper {
 
-    private SqlScripts sqlScripts;
+    private final SqlScripts sqlScripts;
     private SQLiteDatabase writableDatabase;
 
-    public PaprikaDataHelper(Context context, String name, int version) {
-        super(context, name, null, version);
-        init();
-    }
-
-    private void init() {
-        try {
-
-            Class<?> sqlScriptBinder = Class.forName(PAPRIKA_PACKAGE + "." + PAPRIKA_SQL_SCRIPTS_CLASS_NAME);
-            sqlScripts = (SqlScripts) sqlScriptBinder.newInstance();
-
-        } catch (Exception e) {
-            throw new NullPointerException(e.getMessage());
-        }
+    public PaprikaDataHelper(Context context, String name, SqlScripts sqlScripts) {
+        super(context, name, null, sqlScripts.getVersion());
+        this.sqlScripts = sqlScripts;
     }
 
     @Override

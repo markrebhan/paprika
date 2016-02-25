@@ -48,6 +48,9 @@ public class Spice implements Parcelable {
     @Default("0")
     long updateTime;
 
+    @Column(version = 5)
+    byte[] image;
+
     public long getId() {
         return id;
     }
@@ -96,6 +99,14 @@ public class Spice implements Parcelable {
         this.updateTime = updateTime;
     }
 
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
+    }
+
     public String getFlavorString() {
         switch (flavor) {
             case SWEET:
@@ -125,6 +136,7 @@ public class Spice implements Parcelable {
         dest.writeInt(this.tastiness);
         dest.writeString(this.description);
         dest.writeLong(this.updateTime);
+        dest.writeByteArray(image);
     }
 
     public Spice() {
@@ -137,6 +149,7 @@ public class Spice implements Parcelable {
         this.tastiness = in.readInt();
         this.description = in.readString();
         this.updateTime = in.readLong();
+        in.readByteArray(this.image);
     }
 
     public static final Creator<Spice> CREATOR = new Creator<Spice>() {

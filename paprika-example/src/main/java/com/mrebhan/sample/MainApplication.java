@@ -10,7 +10,6 @@ public class MainApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        Paprika paprika = new Paprika();
-        paprika.init(this);
+        Paprika.init(this, "paprika");
     }
 }
