@@ -6,8 +6,10 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
@@ -18,7 +20,7 @@ public final class SqlCreateScripts {
     private static final ClassName STRING = ClassName.get("java.lang", "String");
     private static final ClassName ARRAY_LIST = ClassName.get("java.util", "ArrayList");
 
-    private final List<String> createScripts = new ArrayList<>();
+    private final Set<String> createScripts = new HashSet<>();
     private final SqlUpgradeScripts upgradeScripts;
 
     public SqlCreateScripts(SqlUpgradeScripts upgradeScripts) {

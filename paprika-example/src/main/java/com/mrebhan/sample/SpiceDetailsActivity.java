@@ -13,6 +13,7 @@ import android.widget.EditText;
 import com.mrebhan.R;
 import com.mrebhan.paprika.Paprika;
 import com.mrebhan.sample.data.Spice;
+import com.mrebhan.sample.data.SpiceStorage;
 
 import static com.mrebhan.sample.data.Spice.SAVORY;
 
@@ -66,6 +67,7 @@ public class SpiceDetailsActivity extends AppCompatActivity {
                 isEdit = true;
             } else {
                 spice = new Spice();
+                spice.spiceStorage = new SpiceStorage();
                 spice.setFlavor(SAVORY);
                 spice.setTastiness(1);
             }

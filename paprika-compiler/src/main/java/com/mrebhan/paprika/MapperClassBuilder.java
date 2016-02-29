@@ -4,6 +4,7 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -50,11 +51,11 @@ public final class MapperClassBuilder {
     }};
 
     private static final Map<String, String> CURSOR_FORMAT_MAP = new HashMap<String, String>() {{
-        put("java.lang.Boolean", "$L = cursor.$L($L) != 0");
+        put("java.lang.Boolean", "$L = cursor.$L($N) != 0");
     }};
 
     private static final Map<TypeKind, String> CURSOR_FORMAT_MAP_PRIMITIVE = new HashMap<TypeKind, String>() {{
-        put(BOOLEAN, "$L = cursor.$L($L) != 0");
+        put(BOOLEAN, "$L = cursor.$L($N) != 0");
     }};
 
     private final TypeSpec.Builder builder;
@@ -92,8 +93,14 @@ public final class MapperClassBuilder {
 
         for (String key : elementMap.keySet()) {
             // TODO only for autoincrement
-            if (elementMap.get(key).getAnnotation(PrimaryKey.class) == null) {
-                getContentResolverMethod.addStatement("contentValues.put($S,$L)", key, key);
+            Element element = elementMap.get(key);
+            if (element.getAnnotation(PrimaryKey.class) == null) {
+
+                ForeignObject foreignObject = element.getAnnotation(ForeignObject.class);
+
+                if (foreignObject == null) {
+                    getContentResolverMethod.addStatement("contentValues.put($S,$L)", key, key);
+                }
             }
         }
 
@@ -103,16 +110,32 @@ public final class MapperClassBuilder {
     }
 
     private MethodSpec buildSetupModelCursorMethod(Map<String, Element> elementMap) {
+
         MethodSpec.Builder setupModel = MethodSpec.methodBuilder("setupModel")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
-                .addParameter(CURSOR, "cursor");
+                .addParameter(CURSOR, "cursor")
+                .addParameter(int.class, "index");
 
-        int index = 0;
         for (String key : elementMap.keySet()) {
             Element element = elementMap.get(key);
-            setupModel.addStatement(getCursorFormat(element), key, getCursorMethod(element), index);
-            index++;
+
+            ForeignObject foreignObject = element.getAnnotation(ForeignObject.class);
+
+            if (foreignObject == null) {
+                setupModel.addStatement(getCursorFormat(element), key, getCursorMethod(element), "index");
+                setupModel.addStatement("$L++", "index");
+            } else {
+                HashSet<Element> elements = new HashSet<>();
+                elements.add(element);
+                Set<VariableElement> fields = ElementFilter.fieldsIn(elements);
+                TypeMirror fieldType = fields.iterator().next().asType();
+                String className = fieldType.toString();
+                String fullClassName = getClassName(className, packageName) + PAPRIKA_MAPPER_SUFFIX;
+
+//                setupModel.addStatement("$L = new $L()", key, fullClassName);
+//                setupModel.addStatement("(($L)$L).setupModel($L,$L)", fullClassName, key, "cursor", "index");
+            }
         }
 
         return setupModel.build();
@@ -126,7 +149,22 @@ public final class MapperClassBuilder {
 
 
         for (String key : elementMap.keySet()) {
-            setupModel.addStatement("$L = model.$L", key, key);
+            Element element = elementMap.get(key);
+            ForeignObject foreignObject = element.getAnnotation(ForeignObject.class);
+
+            if (foreignObject == null) {
+                setupModel.addStatement("$L = model.$L", key, key);
+            } else {
+                HashSet<Element> elements = new HashSet<>();
+                elements.add(element);
+                Set<VariableElement> fields = ElementFilter.fieldsIn(elements);
+                TypeMirror fieldType = fields.iterator().next().asType();
+                String className = fieldType.toString();
+                String fullClassName = getClassName(className, packageName) + PAPRIKA_MAPPER_SUFFIX;
+
+                setupModel.addStatement("$L = new $L()", key, fullClassName);
+                setupModel.addStatement("(($L)$L).setupModel(model.$L)", fullClassName, key, key);
+            }
         }
 
         return setupModel.build();
@@ -149,7 +187,7 @@ public final class MapperClassBuilder {
             format = CURSOR_FORMAT_MAP.get(className);
         }
 
-        return format != null ? format : "$L = cursor.$L($L)";
+        return format != null ? format : "$L = cursor.$L($N)";
     }
 
     private String getCursorMethod(Element element) {
@@ -160,10 +198,6 @@ public final class MapperClassBuilder {
         if (kind.isPrimitive()) {
             method = CURSOR_METHOD_MAP_PRIMITIVE.get(kind);
 
-            if (method == null) {
-                throw new IllegalArgumentException("This type is currently not supported: " + kind);
-            }
-
         } else {
             HashSet<Element> elements = new HashSet<>();
             elements.add(element);
@@ -173,10 +207,10 @@ public final class MapperClassBuilder {
 
             method = CURSOR_METHOD_MAP.get(className);
 
-            if (method == null) {
-                throw new IllegalArgumentException("This tpye is currently not supported: " + className);
-            }
+        }
 
+        if (method == null) {
+            throw new IllegalArgumentException("This type is currently not supported: " + kind);
         }
 
         return method;
@@ -185,6 +219,11 @@ public final class MapperClassBuilder {
     private String getClassName(Element element, String packageName) {
         int packageLen = packageName.length() + 1;
         return ((TypeElement) element).getQualifiedName().toString().substring(packageLen).replace('.', '$');
+    }
+
+    private String getClassName(String className, String packageName) {
+        int packageLen = packageName.length() + 1;
+        return className.substring(packageLen).replace('.', '$');
     }
 
 }

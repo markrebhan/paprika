@@ -6,6 +6,7 @@ import android.support.annotation.IntDef;
 
 import com.mrebhan.paprika.Column;
 import com.mrebhan.paprika.Default;
+import com.mrebhan.paprika.ForeignObject;
 import com.mrebhan.paprika.NonNull;
 import com.mrebhan.paprika.PrimaryKey;
 import com.mrebhan.paprika.Table;
@@ -50,6 +51,9 @@ public class Spice implements Parcelable {
 
     @Column(version = 5)
     byte[] image;
+
+    @ForeignObject(version = 6)
+    public SpiceStorage spiceStorage;
 
     public long getId() {
         return id;

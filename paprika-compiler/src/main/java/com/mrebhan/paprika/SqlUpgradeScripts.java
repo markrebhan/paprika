@@ -7,8 +7,10 @@ import com.squareup.javapoet.TypeName;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
@@ -22,7 +24,7 @@ public final class SqlUpgradeScripts {
     private static final ClassName LIST = ClassName.get("java.util", "List");
     private static final ClassName STRING = ClassName.get("java.lang", "String");
 
-    private final Map<Integer, List<String>> upgradeScripts = new HashMap<>();
+    private final Map<Integer, Set<String>> upgradeScripts = new HashMap<>();
     private final Version versionChecker;
 
     public SqlUpgradeScripts(Version version) {
@@ -43,10 +45,10 @@ public final class SqlUpgradeScripts {
 
     private void addUpgradeScriptToMap(int version, String script) {
 
-        List<String> scriptsList = upgradeScripts.get(version);
+        Set<String> scriptsList = upgradeScripts.get(version);
 
         if (scriptsList == null) {
-            scriptsList = new ArrayList<>();
+            scriptsList = new HashSet<>();
         }
 
         scriptsList.add(script);
@@ -66,7 +68,7 @@ public final class SqlUpgradeScripts {
         upgradeMethod.addStatement("$T statementsMap = new $T<>()", mapOfList, HASH_MAP);
 
         for (int version : upgradeScripts.keySet()) {
-            List<String> scripts = upgradeScripts.get(version);
+            Set<String> scripts = upgradeScripts.get(version);
 
             upgradeMethod.addStatement("$T statements$L = new $T<>()", listOfString, version, ARRAY_LIST);
 

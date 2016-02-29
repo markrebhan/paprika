@@ -122,7 +122,7 @@ public final class Paprika {
 
                 try {
                     PaprikaMapper mapper = (PaprikaMapper) superClass.newInstance();
-                    mapper.setupModel(cursor);
+                    mapper.setupModel(cursor, 0);
                     item = (T) mapper;
 
                 } catch (Exception e) {
@@ -158,7 +158,7 @@ public final class Paprika {
                 do {
                     try {
                         PaprikaMapper mapper = (PaprikaMapper) superClass.newInstance();
-                        mapper.setupModel(cursor);
+                        mapper.setupModel(cursor, 0);
                         resultList.add((T) mapper);
 
                     } catch (Exception e) {

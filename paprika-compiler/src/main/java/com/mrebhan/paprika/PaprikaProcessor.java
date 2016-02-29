@@ -53,7 +53,9 @@ public final class PaprikaProcessor extends AbstractProcessor {
     public Set<String> getSupportedAnnotationTypes() {
         Set<String> types = new LinkedHashSet<>();
 
-        types.add(ColumnDefinition.class.getCanonicalName());
+        types.add(Column.class.getCanonicalName());
+        types.add(Default.class.getCanonicalName());
+        types.add(ForeignObject.class.getCanonicalName());
         types.add(Ignore.class.getCanonicalName());
         types.add(NonNull.class.getCanonicalName());
         types.add(PrimaryKey.class.getCanonicalName());
@@ -81,23 +83,7 @@ public final class PaprikaProcessor extends AbstractProcessor {
 
         for (Element element : roundEnv.getElementsAnnotatedWith(Table.class)) {
             Table table = element.getAnnotation(Table.class);
-            final int version = table.version();
-
-            Map<String, Element> elementMappers = new LinkedHashMap<>();
-
-            for (Element classElement : element.getEnclosedElements()) {
-                if (classElement.getKind() == ElementKind.FIELD && !classElement.getModifiers().contains(Modifier.STATIC)) {
-                    elementMappers.put(classElement.getSimpleName().toString(), classElement);
-                }
-            }
-
-            createScripts.addCreateStatement(elementMappers, element);
-
-            if (version > 1) {
-                upgradeScripts.addUpgradeNewTable(elementMappers, element, version);
-            }
-
-            writeToFiler(new MapperClassBuilder(elementMappers, element, getPackageName(element)).build());
+            constructDataMappings(element, table.version(), createScripts, upgradeScripts);
         }
 
         builder.addMethod(createScripts.buildMethod());
@@ -111,6 +97,25 @@ public final class PaprikaProcessor extends AbstractProcessor {
         writeToFiler(javaFile);
 
         return true;
+    }
+
+    private void constructDataMappings(Element element, int version, SqlCreateScripts createScripts, SqlUpgradeScripts upgradeScripts) {
+
+        Map<String, Element> elementMappers = new LinkedHashMap<>();
+
+        for (Element classElement : element.getEnclosedElements()) {
+            if (classElement.getKind() == ElementKind.FIELD && !classElement.getModifiers().contains(Modifier.STATIC)) {
+                elementMappers.put(classElement.getSimpleName().toString(), classElement);
+            }
+        }
+
+        createScripts.addCreateStatement(elementMappers, element);
+
+        if (version > 1) {
+            upgradeScripts.addUpgradeNewTable(elementMappers, element, version);
+        }
+
+        writeToFiler(new MapperClassBuilder(elementMappers, element, getPackageName(element)).build());
     }
 
 

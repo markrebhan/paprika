@@ -59,7 +59,11 @@ public final class ColumnDefinition {
     private void setupDataType(Element element) {
 
         TypeKind kind = element.asType().getKind();
-        if (kind.isPrimitive()) {
+        ForeignObject foreignObject = element.getAnnotation(ForeignObject.class);
+
+        if (foreignObject != null) {
+            dataType = "INTEGER";
+        } else if (kind.isPrimitive()) {
             dataType = SQL_DATA_TYPE_KIND_MAPPER.get(kind);
         } else {
             HashSet<Element> elements = new HashSet<>();

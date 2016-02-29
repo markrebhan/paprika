@@ -1,10 +1,13 @@
 package com.mrebhan.paprika;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Modifier;
 
 import static com.mrebhan.paprika.ColumnDefinition.FLAG_PRIMARY_KEY;
 
@@ -44,9 +47,9 @@ public final class SqlCreateStatement {
             columnDefinitions.add(columnDefinition);
         }
 
-        if (!primaryKeyUsed) {
-            throw new IllegalArgumentException("Please specify a primary key! table = " + tableName);
-        }
+//        if (!primaryKeyUsed) {
+//            throw new IllegalArgumentException("Please specify a primary key! table = " + tableName);
+//        }
     }
 
     @Override
