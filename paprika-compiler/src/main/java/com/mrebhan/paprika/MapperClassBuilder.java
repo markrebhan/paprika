@@ -4,7 +4,6 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -63,7 +62,7 @@ public final class MapperClassBuilder {
 
     public MapperClassBuilder(Map<String, Element> elementMap, Element parent, String packageName) {
         this.packageName = packageName;
-        String className = getClassName(parent, packageName) + PAPRIKA_MAPPER_SUFFIX;
+        String className = getClassName(parent, packageName, false) + PAPRIKA_MAPPER_SUFFIX;
 
         TypeMirror type = parent.asType();
         builder = TypeSpec.classBuilder(className)
@@ -126,12 +125,7 @@ public final class MapperClassBuilder {
                 setupModel.addStatement(getCursorFormat(element), key, getCursorMethod(element), "index");
                 setupModel.addStatement("$L++", "index");
             } else {
-                HashSet<Element> elements = new HashSet<>();
-                elements.add(element);
-                Set<VariableElement> fields = ElementFilter.fieldsIn(elements);
-                TypeMirror fieldType = fields.iterator().next().asType();
-                String className = fieldType.toString();
-                String fullClassName = getClassName(className, packageName) + PAPRIKA_MAPPER_SUFFIX;
+                String mapperClassName = getClassName(element, packageName, false) + PAPRIKA_MAPPER_SUFFIX;
 
 //                setupModel.addStatement("$L = new $L()", key, fullClassName);
 //                setupModel.addStatement("(($L)$L).setupModel($L,$L)", fullClassName, key, "cursor", "index");
@@ -155,15 +149,10 @@ public final class MapperClassBuilder {
             if (foreignObject == null) {
                 setupModel.addStatement("$L = model.$L", key, key);
             } else {
-                HashSet<Element> elements = new HashSet<>();
-                elements.add(element);
-                Set<VariableElement> fields = ElementFilter.fieldsIn(elements);
-                TypeMirror fieldType = fields.iterator().next().asType();
-                String className = fieldType.toString();
-                String fullClassName = getClassName(className, packageName) + PAPRIKA_MAPPER_SUFFIX;
+                String mapperClassName = getClassName(element, packageName, false) + PAPRIKA_MAPPER_SUFFIX;
 
-                setupModel.addStatement("$L = new $L()", key, fullClassName);
-                setupModel.addStatement("(($L)$L).setupModel(model.$L)", fullClassName, key, key);
+                setupModel.addStatement("$L = new $L()", key, mapperClassName);
+                setupModel.addStatement("(($L)$L).setupModel(model.$L)", mapperClassName, key, key);
             }
         }
 
@@ -178,13 +167,7 @@ public final class MapperClassBuilder {
         if (kind.isPrimitive()) {
             format = CURSOR_FORMAT_MAP_PRIMITIVE.get(kind);
         } else {
-            HashSet<Element> elements = new HashSet<>();
-            elements.add(element);
-            Set<VariableElement> fields = ElementFilter.fieldsIn(elements);
-            TypeMirror fieldType = fields.iterator().next().asType();
-            String className = fieldType.toString();
-
-            format = CURSOR_FORMAT_MAP.get(className);
+            format = CURSOR_FORMAT_MAP.get(getClassName(element, packageName, true));
         }
 
         return format != null ? format : "$L = cursor.$L($N)";
@@ -199,13 +182,7 @@ public final class MapperClassBuilder {
             method = CURSOR_METHOD_MAP_PRIMITIVE.get(kind);
 
         } else {
-            HashSet<Element> elements = new HashSet<>();
-            elements.add(element);
-            Set<VariableElement> fields = ElementFilter.fieldsIn(elements);
-            TypeMirror fieldType = fields.iterator().next().asType();
-            String className = fieldType.toString();
-
-            method = CURSOR_METHOD_MAP.get(className);
+            method = CURSOR_METHOD_MAP.get(getClassName(element, packageName, true));
 
         }
 
@@ -216,14 +193,30 @@ public final class MapperClassBuilder {
         return method;
     }
 
-    private String getClassName(Element element, String packageName) {
-        int packageLen = packageName.length() + 1;
-        return ((TypeElement) element).getQualifiedName().toString().substring(packageLen).replace('.', '$');
-    }
+    private String getClassName(Element element, String packageName, boolean includePackage) {
+        final int packageLen = packageName.length() + 1;
 
-    private String getClassName(String className, String packageName) {
-        int packageLen = packageName.length() + 1;
-        return className.substring(packageLen).replace('.', '$');
+        try {
+            String className = ((TypeElement) element).getQualifiedName().toString();
+
+            if (!includePackage) {
+                return className.substring(packageLen).replace('.', '$');
+            } else {
+                return className;
+            }
+        } catch (ClassCastException e) {
+            HashSet<Element> elements = new HashSet<>();
+            elements.add(element);
+            Set<VariableElement> fields = ElementFilter.fieldsIn(elements);
+            TypeMirror fieldType = fields.iterator().next().asType();
+            String className = fieldType.toString();
+
+            if (!includePackage) {
+                return className.substring(packageLen).replace('.', '$');
+            } else {
+                return className;
+            }
+        }
     }
 
 }
