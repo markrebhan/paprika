@@ -21,6 +21,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 
+import static com.mrebhan.paprika.ClassNameFinder.*;
 import static com.mrebhan.paprika.consts.Constants.PAPRIKA_MAPPER_SUFFIX;
 import static javax.lang.model.type.TypeKind.*;
 
@@ -29,6 +30,7 @@ public final class MapperClassBuilder {
     private static final ClassName PAPRIKA_MAPPER = ClassName.get("com.mrebhan.paprika.internal", "PaprikaMapper");
     private static final ClassName CONTENT_VALUES = ClassName.get("android.content", "ContentValues");
     private static final ClassName CURSOR = ClassName.get("android.database", "Cursor");
+    private static final ClassName STRING = ClassName.get("java.lang", "String");
 
     private static final Map<String, String> CURSOR_METHOD_MAP = new HashMap<String, String>() {{
         put("java.lang.Integer", "getInt");
@@ -59,13 +61,15 @@ public final class MapperClassBuilder {
 
     private final TypeSpec.Builder builder;
     private final String packageName;
+    private final String className;
 
     public MapperClassBuilder(Map<String, Element> elementMap, Element parent, String packageName) {
         this.packageName = packageName;
-        String className = getClassName(parent, packageName, false) + PAPRIKA_MAPPER_SUFFIX;
+        className = getClassName(parent, packageName, false);
+        String superClassName = className + PAPRIKA_MAPPER_SUFFIX;
 
         TypeMirror type = parent.asType();
-        builder = TypeSpec.classBuilder(className)
+        builder = TypeSpec.classBuilder(superClassName)
                 .superclass(ClassName.get((TypeElement) parent))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addSuperinterface(ParameterizedTypeName.get(PAPRIKA_MAPPER, TypeName.get(type)))
@@ -114,7 +118,8 @@ public final class MapperClassBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
                 .addParameter(CURSOR, "cursor")
-                .addParameter(int.class, "index");
+                .addParameter(int.class, "index")
+                .returns(int.class);
 
         for (String key : elementMap.keySet()) {
             Element element = elementMap.get(key);
@@ -127,10 +132,12 @@ public final class MapperClassBuilder {
             } else {
                 String mapperClassName = getClassName(element, packageName, false) + PAPRIKA_MAPPER_SUFFIX;
 
-//                setupModel.addStatement("$L = new $L()", key, fullClassName);
-//                setupModel.addStatement("(($L)$L).setupModel($L,$L)", fullClassName, key, "cursor", "index");
+                setupModel.addStatement("$L = new $L()", key, mapperClassName);
+                setupModel.addStatement("$L = (($L)$L).setupModel($L,$L)", "index", mapperClassName, key, "cursor", "index");
             }
         }
+
+        setupModel.addStatement("return $L", "index");
 
         return setupModel.build();
     }
@@ -191,32 +198,6 @@ public final class MapperClassBuilder {
         }
 
         return method;
-    }
-
-    private String getClassName(Element element, String packageName, boolean includePackage) {
-        final int packageLen = packageName.length() + 1;
-
-        try {
-            String className = ((TypeElement) element).getQualifiedName().toString();
-
-            if (!includePackage) {
-                return className.substring(packageLen).replace('.', '$');
-            } else {
-                return className;
-            }
-        } catch (ClassCastException e) {
-            HashSet<Element> elements = new HashSet<>();
-            elements.add(element);
-            Set<VariableElement> fields = ElementFilter.fieldsIn(elements);
-            TypeMirror fieldType = fields.iterator().next().asType();
-            String className = fieldType.toString();
-
-            if (!includePackage) {
-                return className.substring(packageLen).replace('.', '$');
-            } else {
-                return className;
-            }
-        }
     }
 
 }

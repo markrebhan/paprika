@@ -21,6 +21,7 @@ public final class Paprika {
 
     private static PaprikaDataHelper dataHelper;
     private static final Map<Class, Class> CLASS_TO_PAPRIKA_MAP = new WeakHashMap<>();
+    private static SqlScripts sqlScripts;
 
     public Paprika() {
     }
@@ -31,7 +32,7 @@ public final class Paprika {
             try {
 
                 Class<?> sqlScriptBinder = Class.forName(PAPRIKA_PACKAGE + "." + PAPRIKA_SQL_SCRIPTS_CLASS_NAME);
-                SqlScripts sqlScripts = (SqlScripts) sqlScriptBinder.newInstance();
+                sqlScripts = (SqlScripts) sqlScriptBinder.newInstance();
                 dataHelper = new PaprikaDataHelper(context, databaseName, sqlScripts);
 
             } catch (Exception e) {
@@ -147,7 +148,7 @@ public final class Paprika {
 
         SQLiteDatabase db = dataHelper.getWritableDatabase();
 
-        Cursor cursor = db.query(getTableName(objectClazz), null, selection, selectionArgs, null, null, orderBy);
+        Cursor cursor = db.rawQuery(sqlScripts.getSelectQuery(getTableName(superClass)), null);
 
         try {
             List<T> resultList = new ArrayList<>();

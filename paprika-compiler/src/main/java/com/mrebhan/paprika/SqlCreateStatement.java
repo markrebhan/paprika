@@ -28,9 +28,15 @@ public final class SqlCreateStatement {
             ColumnDefinition columnDefinition = new ColumnDefinition(element);
 
             Column column = element.getAnnotation(Column.class);
+            ForeignObject foreignObject = element.getAnnotation(ForeignObject.class);
 
             if (column != null && upgradeScripts != null) {
                 int version = column.version();
+                if (version > 1) {
+                    upgradeScripts.addAlterAddColumn(columnDefinition, tableName, version);
+                }
+            } else if (foreignObject != null && upgradeScripts != null) {
+                int version = foreignObject.version();
                 if (version > 1) {
                     upgradeScripts.addAlterAddColumn(columnDefinition, tableName, version);
                 }
