@@ -7,4 +7,5 @@ public interface PaprikaMapper<T> {
     void setupModel(T copy);
     int setupModel(Cursor cursor, int index);
     ContentValues getContentValues();
+    ContentValuesTree getContentValuesTree();
 }

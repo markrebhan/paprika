@@ -28,6 +28,8 @@ import static javax.lang.model.type.TypeKind.*;
 public final class MapperClassBuilder {
 
     private static final ClassName PAPRIKA_MAPPER = ClassName.get("com.mrebhan.paprika.internal", "PaprikaMapper");
+    private static final ClassName CONTENT_VALUES_TREE = ClassName.get("com.mrebhan.paprika.internal", "ContentValuesTree");
+    private static final ClassName CONTENT_VALUES_WRAPPER = ClassName.get("com.mrebhan.paprika.internal", "ContentValuesWrapper");
     private static final ClassName CONTENT_VALUES = ClassName.get("android.content", "ContentValues");
     private static final ClassName CURSOR = ClassName.get("android.database", "Cursor");
     private static final ClassName STRING = ClassName.get("java.lang", "String");
@@ -63,8 +65,11 @@ public final class MapperClassBuilder {
     private final String packageName;
     private final String className;
 
-    public MapperClassBuilder(Map<String, Element> elementMap, Element parent, String packageName) {
+    private final Map<Element, Map<String, Element>> tableMap;
+
+    public MapperClassBuilder(Map<String, Element> elementMap, Element parent, Map<Element, Map<String, Element>> tableMap, String packageName) {
         this.packageName = packageName;
+        this.tableMap = tableMap;
         className = getClassName(parent, packageName, false);
         String superClassName = className + PAPRIKA_MAPPER_SUFFIX;
 
@@ -78,6 +83,7 @@ public final class MapperClassBuilder {
         builder.addMethod(buildSetupModelCopyMethod(elementMap, type));
         builder.addMethod(buildSetupModelCursorMethod(elementMap));
         builder.addMethod(buildContentValuesMethod(elementMap));
+        builder.addMethod(buildContentValuesTreeMethod(elementMap, parent));
     }
 
     public JavaFile build() {
@@ -110,6 +116,72 @@ public final class MapperClassBuilder {
         getContentResolverMethod.addStatement("return contentValues");
 
         return getContentResolverMethod.build();
+    }
+
+    private MethodSpec buildContentValuesTreeMethod(Map<String, Element> elementMap, Element parent) {
+        MethodSpec.Builder getContentResolverMethod = MethodSpec.methodBuilder("getContentValuesTree")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .returns(CONTENT_VALUES_TREE);
+
+        getContentResolverMethod.addStatement("$T.Builder builder = new $T.Builder()", CONTENT_VALUES_TREE, CONTENT_VALUES_TREE);
+
+        getContentResolverMethod.addStatement("$T rootWrapper = builder.setRootNode(getContentValues(), $S)", CONTENT_VALUES_WRAPPER, className);
+
+        for (String key : elementMap.keySet()) {
+            Element element = elementMap.get(key);
+            if (element.getAnnotation(PrimaryKey.class) == null) {
+
+                ForeignObject foreignObject = element.getAnnotation(ForeignObject.class);
+
+                if (foreignObject != null) {
+                    addChildWrapper(element, getContentResolverMethod, "rootWrapper");
+                }
+            }
+        }
+
+        getContentResolverMethod.addStatement("return builder.build()");
+
+        return getContentResolverMethod.build();
+    }
+
+    private void addChildWrapper(Element childElement, MethodSpec.Builder builder, String parentMemberName) {
+
+        String className = getClassName(childElement, packageName, false);
+        Map<String, Element> elementMap = getElementMapFromClassName(className);
+
+        if (elementMap != null) {
+
+            String mapperClassName = className + PAPRIKA_MAPPER_SUFFIX;
+
+            builder.addStatement("$T wrapper$L = builder.addChild($L, (($L) $L).getContentValues(), $S)", CONTENT_VALUES_WRAPPER,
+                    className, parentMemberName, mapperClassName, childElement.getSimpleName().toString(), className);
+
+            for (String key : elementMap.keySet()) {
+                Element element = elementMap.get(key);
+                if (element.getAnnotation(PrimaryKey.class) == null) {
+
+                    ForeignObject foreignObject = element.getAnnotation(ForeignObject.class);
+
+                    if (foreignObject != null) {
+                        addChildWrapper(element, builder, String.format("wrapper%S", className));
+                    }
+                }
+            }
+        }
+    }
+
+    private Map<String, Element> getElementMapFromClassName(String className) {
+        Map<String, Element> elementMap = null;
+
+        for (Element elementMapper : tableMap.keySet()) {
+            if (elementMapper.getSimpleName().toString().equals(className)) {
+                elementMap = tableMap.get(elementMapper);
+                break;
+            }
+        }
+
+        return elementMap;
     }
 
     private MethodSpec buildSetupModelCursorMethod(Map<String, Element> elementMap) {

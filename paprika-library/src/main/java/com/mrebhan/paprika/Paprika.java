@@ -5,6 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.mrebhan.paprika.internal.ContentValuesTree;
+import com.mrebhan.paprika.internal.ContentValuesWrapper;
 import com.mrebhan.paprika.internal.PaprikaMapper;
 import com.mrebhan.paprika.internal.SqlScripts;
 
@@ -64,11 +66,14 @@ public final class Paprika {
             }
         }
 
-        ContentValues contentValues = mapperClass.getContentValues();
-
         SQLiteDatabase db = dataHelper.getWritableDatabase();
 
-        db.insertWithOnConflict(getTableName(data.getClass()), null, contentValues, SQLiteDatabase.CONFLICT_REPLACE);
+        ContentValuesTree contentValuesTree = mapperClass.getContentValuesTree();
+
+        while (contentValuesTree.hasNext()) {
+            ContentValuesWrapper contentValuesWrapper = contentValuesTree.next();
+            long row = db.insertWithOnConflict(contentValuesWrapper.getTableName(), null, contentValuesWrapper.getContentValues(), SQLiteDatabase.CONFLICT_REPLACE);
+        }
 
         return mapperClass;
     }
@@ -112,8 +117,8 @@ public final class Paprika {
 
         SQLiteDatabase db = dataHelper.getWritableDatabase();
 
-        // TODO add dynamic ID in mapper class
-        Cursor cursor = db.query(getTableName(objectClazz), null, "_id = ?", new String[]{Long.toString(id)}, null, null, null);
+        //TODO clean this
+        Cursor cursor = db.rawQuery(sqlScripts.getSelectQuery(getTableName(superClass)) + " " + getTableName(objectClazz) + "._id=" + id, null);
 
         try {
             T item = null;

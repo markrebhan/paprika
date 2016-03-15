@@ -135,7 +135,7 @@ public final class PaprikaProcessor extends AbstractProcessor {
             upgradeScripts.addUpgradeNewTable(elementMappers, element, version);
         }
 
-        writeToFiler(new MapperClassBuilder(elementMappers, element, getPackageName(element)).build());
+        writeToFiler(new MapperClassBuilder(elementMappers, element, tableMap, getPackageName(element)).build());
     }
 
 
