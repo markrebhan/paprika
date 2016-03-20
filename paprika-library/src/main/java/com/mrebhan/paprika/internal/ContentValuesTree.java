@@ -2,6 +2,8 @@ package com.mrebhan.paprika.internal;
 
 import android.content.ContentValues;
 
+import java.util.List;
+
 public class ContentValuesTree {
 
     private final ContentValuesWrapper rootContentValuesWrapper;
@@ -11,10 +13,6 @@ public class ContentValuesTree {
     public ContentValuesTree(ContentValuesWrapper rootContentValuesWrapper) {
         this.rootContentValuesWrapper = rootContentValuesWrapper;
         findNextWrapper(rootContentValuesWrapper);
-    }
-
-    public boolean hasNext() {
-        return !currentWrapper.isConsumed();
     }
 
     private void findNextWrapper(ContentValuesWrapper contentValuesWrapper) {
@@ -29,24 +27,33 @@ public class ContentValuesTree {
         }
     }
 
+    public boolean hasNext() {
+        return !currentWrapper.isConsumed();
+    }
+
     public ContentValuesWrapper next() {
         findNextWrapper(rootContentValuesWrapper);
-        currentWrapper.consume();;
-        return currentWrapper;
+
+        if (currentWrapper.isConsumed()) {
+            return null;
+        } else {
+            currentWrapper.consume();
+            return currentWrapper;
+        }
     }
 
     public static class Builder {
 
         private ContentValuesWrapper rootContentValuesWrapper;
 
-        public ContentValuesWrapper setRootNode(ContentValues contentValues, String table) {
-            rootContentValuesWrapper = new ContentValuesWrapper(contentValues, table);
+        public ContentValuesWrapper setRootNode(ContentValues contentValues, String table, List<String> externalMappings) {
+            rootContentValuesWrapper = new ContentValuesWrapper(null, contentValues, table, externalMappings);
             return rootContentValuesWrapper;
         }
 
-        public ContentValuesWrapper addChild(ContentValuesWrapper parent, ContentValues contentValues, String table) {
-            ContentValuesWrapper contentValuesWrapper = new ContentValuesWrapper(contentValues, table);
-            parent.addNode(new ContentValuesWrapper(contentValues, table));
+        public ContentValuesWrapper addChild(ContentValuesWrapper parent, ContentValues contentValues, String table, List<String> externalMappings) {
+            ContentValuesWrapper contentValuesWrapper = new ContentValuesWrapper(parent, contentValues, table, externalMappings);
+            parent.addNode(contentValuesWrapper);
             return contentValuesWrapper;
         }
 

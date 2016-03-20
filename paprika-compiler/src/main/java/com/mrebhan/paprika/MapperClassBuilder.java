@@ -33,6 +33,7 @@ public final class MapperClassBuilder {
     private static final ClassName CONTENT_VALUES = ClassName.get("android.content", "ContentValues");
     private static final ClassName CURSOR = ClassName.get("android.database", "Cursor");
     private static final ClassName STRING = ClassName.get("java.lang", "String");
+    private static final ClassName ARRAY_LIST = ClassName.get("java.util", "ArrayList");
 
     private static final Map<String, String> CURSOR_METHOD_MAP = new HashMap<String, String>() {{
         put("java.lang.Integer", "getInt");
@@ -84,6 +85,7 @@ public final class MapperClassBuilder {
         builder.addMethod(buildSetupModelCursorMethod(elementMap));
         builder.addMethod(buildContentValuesMethod(elementMap));
         builder.addMethod(buildContentValuesTreeMethod(elementMap, parent));
+        builder.addMethod(externalMappingsMethod.build());
     }
 
     public JavaFile build() {
@@ -92,6 +94,8 @@ public final class MapperClassBuilder {
                 .build();
     }
 
+    private MethodSpec.Builder externalMappingsMethod;
+
     private MethodSpec buildContentValuesMethod(Map<String, Element> elementMap) {
         MethodSpec.Builder getContentResolverMethod = MethodSpec.methodBuilder("getContentValues")
                 .addModifiers(Modifier.PUBLIC)
@@ -99,6 +103,16 @@ public final class MapperClassBuilder {
                 .returns(CONTENT_VALUES);
 
         getContentResolverMethod.addStatement("$T contentValues = new $T()", CONTENT_VALUES, CONTENT_VALUES);
+
+        TypeName listOfString = ParameterizedTypeName.get(ARRAY_LIST, STRING);
+
+        externalMappingsMethod = MethodSpec.methodBuilder("getExternalMappings")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .returns(listOfString);
+
+        externalMappingsMethod.addStatement("$T externalMappings = new $T()", listOfString, listOfString);
+
 
         for (String key : elementMap.keySet()) {
             // TODO only for autoincrement
@@ -109,11 +123,15 @@ public final class MapperClassBuilder {
 
                 if (foreignObject == null) {
                     getContentResolverMethod.addStatement("contentValues.put($S,$L)", key, key);
+                } else {
+                    // TODO do not use keys in case of multiple
+                    externalMappingsMethod.addStatement("externalMappings.add($S)", key);
                 }
             }
         }
 
         getContentResolverMethod.addStatement("return contentValues");
+        externalMappingsMethod.addStatement("return externalMappings");
 
         return getContentResolverMethod.build();
     }
@@ -126,7 +144,7 @@ public final class MapperClassBuilder {
 
         getContentResolverMethod.addStatement("$T.Builder builder = new $T.Builder()", CONTENT_VALUES_TREE, CONTENT_VALUES_TREE);
 
-        getContentResolverMethod.addStatement("$T rootWrapper = builder.setRootNode(getContentValues(), $S)", CONTENT_VALUES_WRAPPER, className);
+        getContentResolverMethod.addStatement("$T rootWrapper = builder.setRootNode(getContentValues(), $S, getExternalMappings())", CONTENT_VALUES_WRAPPER, className);
 
         for (String key : elementMap.keySet()) {
             Element element = elementMap.get(key);
@@ -154,8 +172,8 @@ public final class MapperClassBuilder {
 
             String mapperClassName = className + PAPRIKA_MAPPER_SUFFIX;
 
-            builder.addStatement("$T wrapper$L = builder.addChild($L, (($L) $L).getContentValues(), $S)", CONTENT_VALUES_WRAPPER,
-                    className, parentMemberName, mapperClassName, childElement.getSimpleName().toString(), className);
+            builder.addStatement("$T wrapper$L = builder.addChild($L, (($L) $L).getContentValues(), $S, (($L) $L).getExternalMappings())", CONTENT_VALUES_WRAPPER,
+                    className, parentMemberName, mapperClassName, childElement.getSimpleName().toString(), className, mapperClassName, childElement.getSimpleName().toString());
 
             for (String key : elementMap.keySet()) {
                 Element element = elementMap.get(key);

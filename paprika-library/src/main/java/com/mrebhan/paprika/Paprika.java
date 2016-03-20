@@ -70,9 +70,16 @@ public final class Paprika {
 
         ContentValuesTree contentValuesTree = mapperClass.getContentValuesTree();
 
+        long row = -1;
+
         while (contentValuesTree.hasNext()) {
             ContentValuesWrapper contentValuesWrapper = contentValuesTree.next();
-            long row = db.insertWithOnConflict(contentValuesWrapper.getTableName(), null, contentValuesWrapper.getContentValues(), SQLiteDatabase.CONFLICT_REPLACE);
+            row = db.insertWithOnConflict(contentValuesWrapper.getTableName(), null, contentValuesWrapper.getContentValues(), SQLiteDatabase.CONFLICT_REPLACE);
+
+            ContentValuesWrapper parent = contentValuesWrapper.getParentNode();
+            if (parent != null) {
+                parent.addExternalMappingIndex(row);
+            }
         }
 
         return mapperClass;
