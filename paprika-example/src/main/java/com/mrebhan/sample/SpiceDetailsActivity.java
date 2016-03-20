@@ -68,6 +68,9 @@ public class SpiceDetailsActivity extends AppCompatActivity {
             } else {
                 spice = new Spice();
                 spice.spiceStorage = new SpiceStorage();
+                spice.spiceStorage.setCoolAndDark(true);
+                spice.spiceStorage.setName("Jar");
+                spice.spiceStorage.setStorageType(1);
                 spice.setFlavor(SAVORY);
                 spice.setTastiness(1);
             }

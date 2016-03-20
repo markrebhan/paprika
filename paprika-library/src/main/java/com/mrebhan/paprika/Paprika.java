@@ -70,11 +70,10 @@ public final class Paprika {
 
         ContentValuesTree contentValuesTree = mapperClass.getContentValuesTree();
 
-        long row = -1;
 
         while (contentValuesTree.hasNext()) {
             ContentValuesWrapper contentValuesWrapper = contentValuesTree.next();
-            row = db.insertWithOnConflict(contentValuesWrapper.getTableName(), null, contentValuesWrapper.getContentValues(), SQLiteDatabase.CONFLICT_REPLACE);
+            long row = db.insertWithOnConflict(contentValuesWrapper.getTableName(), null, contentValuesWrapper.getContentValues(), SQLiteDatabase.CONFLICT_REPLACE);
 
             ContentValuesWrapper parent = contentValuesWrapper.getParentNode();
             if (parent != null) {
@@ -125,7 +124,7 @@ public final class Paprika {
         SQLiteDatabase db = dataHelper.getWritableDatabase();
 
         //TODO clean this
-        Cursor cursor = db.rawQuery(sqlScripts.getSelectQuery(getTableName(superClass)) + " " + getTableName(objectClazz) + "._id=" + id, null);
+        Cursor cursor = db.rawQuery(sqlScripts.getSelectQuery(getTableName(superClass)) + " WHERE " + getTableName(objectClazz) + "._id=" + id, null);
 
         try {
             T item = null;
