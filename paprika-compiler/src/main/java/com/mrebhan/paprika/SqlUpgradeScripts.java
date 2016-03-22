@@ -1,28 +1,20 @@
 package com.mrebhan.paprika;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 
-public final class SqlUpgradeScripts {
+import static com.mrebhan.paprika.PaprikaMappings.*;
 
-    private static final ClassName HASH_MAP = ClassName.get("java.util", "HashMap");
-    private static final ClassName ARRAY_LIST = ClassName.get("java.util", "ArrayList");
-    private static final ClassName MAP = ClassName.get("java.util", "Map");
-    private static final ClassName INTEGER = ClassName.get("java.lang", "Integer");
-    private static final ClassName LIST = ClassName.get("java.util", "List");
-    private static final ClassName STRING = ClassName.get("java.lang", "String");
+public final class SqlUpgradeScripts {
 
     private final Map<Integer, Set<String>> upgradeScripts = new HashMap<>();
     private final Version versionChecker;

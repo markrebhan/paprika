@@ -9,31 +9,20 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.ElementFilter;
 
 import static com.mrebhan.paprika.ClassNameFinder.*;
+import static com.mrebhan.paprika.PaprikaMappings.*;
 import static com.mrebhan.paprika.consts.Constants.PAPRIKA_MAPPER_SUFFIX;
 import static javax.lang.model.type.TypeKind.*;
 
 public final class MapperClassBuilder {
-
-    private static final ClassName PAPRIKA_MAPPER = ClassName.get("com.mrebhan.paprika.internal", "PaprikaMapper");
-    private static final ClassName CONTENT_VALUES_TREE = ClassName.get("com.mrebhan.paprika.internal", "ContentValuesTree");
-    private static final ClassName CONTENT_VALUES_WRAPPER = ClassName.get("com.mrebhan.paprika.internal", "ContentValuesWrapper");
-    private static final ClassName CONTENT_VALUES = ClassName.get("android.content", "ContentValues");
-    private static final ClassName CURSOR = ClassName.get("android.database", "Cursor");
-    private static final ClassName STRING = ClassName.get("java.lang", "String");
-    private static final ClassName ARRAY_LIST = ClassName.get("java.util", "ArrayList");
 
     private static final Map<String, String> CURSOR_METHOD_MAP = new HashMap<String, String>() {{
         put("java.lang.Integer", "getInt");

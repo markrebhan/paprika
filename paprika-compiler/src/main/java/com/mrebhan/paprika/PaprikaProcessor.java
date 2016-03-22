@@ -1,13 +1,10 @@
 package com.mrebhan.paprika;
 
 import com.google.auto.service.AutoService;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.TypeSpec;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -24,22 +21,16 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import sun.rmi.runtime.Log;
-
 import static com.mrebhan.paprika.consts.Constants.PAPRIKA_PACKAGE;
-import static com.mrebhan.paprika.consts.Constants.PAPRIKA_SQL_SCRIPTS_CLASS_NAME;
 
 //TODO add support for having _id in class or generate it
 
 @AutoService(Processor.class)
 public final class PaprikaProcessor extends AbstractProcessor {
-    private static final ClassName SQL_SCRIPTS = ClassName.get("com.mrebhan.paprika.internal", "SqlScripts");
 
     private Elements elementUtils;
     private Types typeUtils;
     private Filer filer;
-
-    private Map<Element, Map<String, Element>> tableMap = new HashMap<>();
 
     //TODO use SuperFicialValidation
     private boolean isProcessed;
@@ -69,6 +60,8 @@ public final class PaprikaProcessor extends AbstractProcessor {
         return types;
     }
 
+    private PaprikaMappings paprikaMappings;
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
@@ -80,33 +73,22 @@ public final class PaprikaProcessor extends AbstractProcessor {
 
         isProcessed = true;
 
+        Map<Element, Map<String, Element>> tableMap = new HashMap<>();
+
         for (Element element : roundEnv.getElementsAnnotatedWith(Table.class)) {
             tableMap.put(element, getElementMap(element));
         }
 
-        TypeSpec.Builder builder = TypeSpec.classBuilder(PAPRIKA_SQL_SCRIPTS_CLASS_NAME).addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addSuperinterface(SQL_SCRIPTS);
-
-        final Version versionChecker = new Version();
-        final SqlUpgradeScripts upgradeScripts = new SqlUpgradeScripts(versionChecker);
-        final SqlCreateScripts createScripts = new SqlCreateScripts(upgradeScripts);
-        final SqlSelectScripts selectScripts = new SqlSelectScripts(builder, tableMap);
+        paprikaMappings = PaprikaMappings.getInstance(tableMap);
 
         for (Element element : tableMap.keySet()) {
             Table table = element.getAnnotation(Table.class);
-            constructDataMappings(element, table.version(), createScripts, upgradeScripts, selectScripts);
+            writeToFiler(paprikaMappings.constructDataMappings(element, table.version(), getPackageName(element)));
         }
 
-        builder.addMethod(createScripts.buildMethod());
-        builder.addMethod(upgradeScripts.buildMethod());
-        builder.addMethod(versionChecker.buildMethod());
-        selectScripts.build();
-
-        JavaFile javaFile = JavaFile.builder(PAPRIKA_PACKAGE, builder.build())
+        writeToFiler(JavaFile.builder(PAPRIKA_PACKAGE, paprikaMappings.build())
                 .addFileComment("Code Generated for Paprika. Do not modify!")
-                .build();
-
-        writeToFiler(javaFile);
+                .build());
 
         return true;
     }
@@ -123,21 +105,6 @@ public final class PaprikaProcessor extends AbstractProcessor {
 
         return elementMap;
     }
-
-    private void constructDataMappings(Element element, int version, SqlCreateScripts createScripts, SqlUpgradeScripts upgradeScripts, SqlSelectScripts sqlSelectScripts) {
-
-        Map<String, Element> elementMappers = tableMap.get(element);
-
-        createScripts.addCreateStatement(elementMappers, element);
-        sqlSelectScripts.addSelectStatement(element, getPackageName(element));
-
-        if (version > 1) {
-            upgradeScripts.addUpgradeNewTable(elementMappers, element, version);
-        }
-
-        writeToFiler(new MapperClassBuilder(elementMappers, element, tableMap, getPackageName(element)).build());
-    }
-
 
     private void writeToFiler(JavaFile javaFile) {
         try {

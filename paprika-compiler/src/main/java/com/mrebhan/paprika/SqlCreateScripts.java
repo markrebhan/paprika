@@ -1,24 +1,19 @@
 package com.mrebhan.paprika;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 
-public final class SqlCreateScripts {
+import static com.mrebhan.paprika.PaprikaMappings.*;
 
-    private static final ClassName LIST = ClassName.get("java.util", "List");
-    private static final ClassName STRING = ClassName.get("java.lang", "String");
-    private static final ClassName ARRAY_LIST = ClassName.get("java.util", "ArrayList");
+public final class SqlCreateScripts {
 
     private final Set<String> createScripts = new HashSet<>();
     private final SqlUpgradeScripts upgradeScripts;

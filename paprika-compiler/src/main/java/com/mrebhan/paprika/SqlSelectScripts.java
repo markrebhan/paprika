@@ -1,6 +1,5 @@
 package com.mrebhan.paprika;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -14,11 +13,10 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 
 import static com.mrebhan.paprika.ClassNameFinder.*;
+import static com.mrebhan.paprika.PaprikaMappings.*;
 
 public final class SqlSelectScripts {
 
-    private static final ClassName HASH_MAP = ClassName.get("java.util", "HashMap");
-    private static final ClassName STRING = ClassName.get("java.lang", "String");
     private static final String ID = "_id";
 
     private TypeSpec.Builder builder;
