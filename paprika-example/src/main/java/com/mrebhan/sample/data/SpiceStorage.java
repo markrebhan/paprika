@@ -3,6 +3,7 @@ package com.mrebhan.sample.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.mrebhan.paprika.ForeignObject;
 import com.mrebhan.paprika.PrimaryKey;
 import com.mrebhan.paprika.Table;
 
@@ -18,6 +19,9 @@ public class SpiceStorage implements Parcelable {
     int storageType;
 
     boolean coolAndDark;
+
+    @ForeignObject(version = 7)
+    public SpiceContainer spiceContainer;
 
     public String getName() {
         return name;
@@ -41,6 +45,14 @@ public class SpiceStorage implements Parcelable {
 
     public void setCoolAndDark(boolean coolAndDark) {
         this.coolAndDark = coolAndDark;
+    }
+
+    public SpiceContainer getSpiceContainer() {
+        return spiceContainer;
+    }
+
+    public void setSpiceContainer(SpiceContainer spiceContainer) {
+        this.spiceContainer = spiceContainer;
     }
 
     @Override

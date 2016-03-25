@@ -11,16 +11,19 @@ public class ContentValuesWrapper {
     private final ContentValues contentValues;
     private final String tableName;
     private final List<ContentValuesWrapper> contentValueNodes;
-    private final ContentValuesWrapper parentNode;
     private final Iterator<String> externalMappings;
+    private ContentValuesWrapper parentNode;
     private boolean isConsumed;
 
-    public ContentValuesWrapper(ContentValuesWrapper wrapper, ContentValues contentValues, String tableName, List<String> externalMappings) {
-        this.parentNode = wrapper;
+    public ContentValuesWrapper(ContentValues contentValues, String tableName, List<String> externalMappings) {
         this.contentValues = contentValues;
         this.tableName = tableName;
         this.externalMappings = externalMappings.iterator();
         this.contentValueNodes = new ArrayList<>();
+    }
+
+    public void setParentNode(ContentValuesWrapper parentNode) {
+        this.parentNode = parentNode;
     }
 
     public void addNode(ContentValuesWrapper contentValuesWrapper) {

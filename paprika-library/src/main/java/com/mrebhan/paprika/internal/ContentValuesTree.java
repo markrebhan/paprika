@@ -12,7 +12,6 @@ public class ContentValuesTree {
 
     public ContentValuesTree(ContentValuesWrapper rootContentValuesWrapper) {
         this.rootContentValuesWrapper = rootContentValuesWrapper;
-        findNextWrapper(rootContentValuesWrapper);
     }
 
     private void findNextWrapper(ContentValuesWrapper contentValuesWrapper) {
@@ -28,6 +27,7 @@ public class ContentValuesTree {
     }
 
     public boolean hasNext() {
+        findNextWrapper(rootContentValuesWrapper);
         return !currentWrapper.isConsumed();
     }
 
@@ -47,14 +47,13 @@ public class ContentValuesTree {
         private ContentValuesWrapper rootContentValuesWrapper;
 
         public ContentValuesWrapper setRootNode(ContentValues contentValues, String table, List<String> externalMappings) {
-            rootContentValuesWrapper = new ContentValuesWrapper(null, contentValues, table, externalMappings);
+            rootContentValuesWrapper = new ContentValuesWrapper(contentValues, table, externalMappings);
             return rootContentValuesWrapper;
         }
 
-        public ContentValuesWrapper addChild(ContentValuesWrapper parent, ContentValues contentValues, String table, List<String> externalMappings) {
-            ContentValuesWrapper contentValuesWrapper = new ContentValuesWrapper(parent, contentValues, table, externalMappings);
-            parent.addNode(contentValuesWrapper);
-            return contentValuesWrapper;
+        public void addChild(ContentValuesWrapper parent, ContentValuesTree childTree) {
+            childTree.rootContentValuesWrapper.setParentNode(parent);
+            parent.addNode(childTree.rootContentValuesWrapper);
         }
 
         public ContentValuesTree build() {

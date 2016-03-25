@@ -13,6 +13,7 @@ import android.widget.EditText;
 import com.mrebhan.R;
 import com.mrebhan.paprika.Paprika;
 import com.mrebhan.sample.data.Spice;
+import com.mrebhan.sample.data.SpiceContainer;
 import com.mrebhan.sample.data.SpiceStorage;
 
 import static com.mrebhan.sample.data.Spice.SAVORY;

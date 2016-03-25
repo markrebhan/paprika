@@ -161,20 +161,11 @@ public final class MapperClassBuilder {
 
             String mapperClassName = className + PAPRIKA_MAPPER_SUFFIX;
 
-            builder.addStatement("$T wrapper$L = builder.addChild($L, (($L) $L).getContentValues(), $S, (($L) $L).getExternalMappings())", CONTENT_VALUES_WRAPPER,
-                    className, parentMemberName, mapperClassName, childElement.getSimpleName().toString(), className, mapperClassName, childElement.getSimpleName().toString());
-
-            for (String key : elementMap.keySet()) {
-                Element element = elementMap.get(key);
-                if (element.getAnnotation(PrimaryKey.class) == null) {
-
-                    ForeignObject foreignObject = element.getAnnotation(ForeignObject.class);
-
-                    if (foreignObject != null) {
-                        addChildWrapper(element, builder, String.format("wrapper%S", className));
-                    }
-                }
-            }
+            String childName = childElement.getSimpleName().toString();
+            builder.beginControlFlow("if ($L != null)", childName);
+            builder.addStatement("builder.addChild($L, (($L) $L).getContentValuesTree())",
+                    parentMemberName, mapperClassName, childName);
+            builder.endControlFlow();
         }
     }
 
@@ -237,8 +228,10 @@ public final class MapperClassBuilder {
             } else {
                 String mapperClassName = getClassName(element, packageName, false) + PAPRIKA_MAPPER_SUFFIX;
 
+                setupModel.beginControlFlow("if (model.$L != null)", key);
                 setupModel.addStatement("$L = new $L()", key, mapperClassName);
                 setupModel.addStatement("(($L)$L).setupModel(model.$L)", mapperClassName, key, key);
+                setupModel.endControlFlow();
             }
         }
 
