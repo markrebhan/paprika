@@ -266,7 +266,7 @@ public final class MapperClassBuilder {
         }
 
         if (method == null) {
-            throw new IllegalArgumentException("This type is currently not supported: " + kind);
+            Logger.logError(element, "This type is currently not supported: " + kind);
         }
 
         return method;

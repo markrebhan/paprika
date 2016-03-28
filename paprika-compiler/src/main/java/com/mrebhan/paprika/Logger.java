@@ -1,5 +1,9 @@
 package com.mrebhan.paprika;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.annotation.Annotation;
+
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 import javax.tools.Diagnostic;
@@ -12,10 +16,6 @@ public final class Logger {
     public Logger(Messager messager) {
         this.messager = messager;
         instance = this;
-    }
-
-    public static Logger getInstance() {
-        return instance;
     }
 
     public static void logError(Element element, String message, Object... args) {
@@ -32,5 +32,11 @@ public final class Logger {
         }
 
         instance.messager.printMessage(Diagnostic.Kind.NOTE, message);
+    }
+
+    public static void logError(Element element, String message, Exception e) {
+        StringWriter stackTrace = new StringWriter();
+        e.printStackTrace(new PrintWriter(stackTrace));
+        logError(element, message, stackTrace);
     }
 }

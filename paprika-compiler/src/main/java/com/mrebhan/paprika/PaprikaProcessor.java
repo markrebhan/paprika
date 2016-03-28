@@ -60,8 +60,6 @@ public final class PaprikaProcessor extends AbstractProcessor {
         return types;
     }
 
-    private PaprikaMappings paprikaMappings;
-
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
@@ -79,7 +77,7 @@ public final class PaprikaProcessor extends AbstractProcessor {
             tableMap.put(element, getElementMap(element));
         }
 
-        paprikaMappings = PaprikaMappings.getInstance(tableMap);
+        PaprikaMappings paprikaMappings = PaprikaMappings.getInstance(tableMap);
 
         for (Element element : tableMap.keySet()) {
             Table table = element.getAnnotation(Table.class);

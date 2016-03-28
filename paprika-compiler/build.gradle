@@ -5,4 +5,11 @@ dependencies {
     compile deps.javapoet
     compile deps.autoservice
     compile deps.autocommon
+
+    testCompile deps.junit
+    testCompile deps.truth
+    testCompile deps.robolectric
+    testCompile deps.compiletesting
+    testCompile deps.android
+    testCompile files(org.gradle.internal.jvm.Jvm.current().getToolsJar())
 }
