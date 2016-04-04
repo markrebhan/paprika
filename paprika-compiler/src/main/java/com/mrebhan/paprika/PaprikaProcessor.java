@@ -77,7 +77,7 @@ public final class PaprikaProcessor extends AbstractProcessor {
             tableMap.put(element, getElementMap(element));
         }
 
-        PaprikaMappings paprikaMappings = PaprikaMappings.getInstance(tableMap);
+        PaprikaMappings paprikaMappings = new PaprikaMappings(tableMap);
 
         for (Element element : tableMap.keySet()) {
             Table table = element.getAnnotation(Table.class);

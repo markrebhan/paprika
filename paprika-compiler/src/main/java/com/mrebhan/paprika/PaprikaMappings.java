@@ -26,8 +26,6 @@ public final class PaprikaMappings {
     public static final ClassName MAP = ClassName.get("java.util", "Map");
     public static final ClassName INTEGER = ClassName.get("java.lang", "Integer");
 
-    private static PaprikaMappings instance;
-
     private final Map<Element, Map<String, Element>> tableMap;
     private final TypeSpec.Builder builder;
 
@@ -36,7 +34,7 @@ public final class PaprikaMappings {
     private final SqlCreateScripts sqlCreateScripts;
     private final SqlSelectScripts sqlSelectScripts;
 
-    private PaprikaMappings(Map<Element, Map<String, Element>> tableMap) {
+    public PaprikaMappings(Map<Element, Map<String, Element>> tableMap) {
         this.tableMap = tableMap;
         this.builder = TypeSpec.classBuilder(PAPRIKA_SQL_SCRIPTS_CLASS_NAME).addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addSuperinterface(SQL_SCRIPTS);
@@ -45,13 +43,6 @@ public final class PaprikaMappings {
         this.sqlUpgradeScripts = new SqlUpgradeScripts(version);
         this.sqlCreateScripts = new SqlCreateScripts(sqlUpgradeScripts);
         this.sqlSelectScripts = new SqlSelectScripts(builder, tableMap);
-    }
-
-    public static PaprikaMappings getInstance(Map<Element, Map<String, Element>> tableMap) {
-        if (instance == null) {
-            instance = new PaprikaMappings(tableMap);
-        }
-        return instance;
     }
 
     public JavaFile constructDataMappings(Element element, int version, String packageName) {

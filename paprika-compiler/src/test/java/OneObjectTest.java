@@ -136,11 +136,11 @@ public class OneObjectTest {
 
 
     @Test public void testUnsupportedDataType() {
-        JavaFileObject source = JavaFileObjects.forSourceString("test.Test2", Joiner.on('\n').join(
+        JavaFileObject source = JavaFileObjects.forSourceString("test.Test", Joiner.on('\n').join(
                 "package test;",
                 "import java.util.List;",
                 "import com.mrebhan.paprika.Table;",
-                "@Table public class Test2 {",
+                "@Table public class Test {",
                 "int thingone;",
                 "List thingTwo;",
                 "}"
