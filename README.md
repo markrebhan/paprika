@@ -5,7 +5,7 @@ Paprika
 
 ### Example
 
-Here's a simple example of initialzing the library, creating a data object with `Paprika` annotations, and running basic operations against the library:
+Here's a simple example of initializing the library, creating a data object with `Paprika` annotations, and running basic operations against the library:
 
 ```java
 import android.app.Application;
@@ -66,11 +66,11 @@ public class PaprikaMethodsDemo() {
 
 `Table` is used to specify if the data class should be added to the database.
 
-`Column` is used to specify a field member should be added as a column to the table. Columns are automatically infrered as non static, non private and table versioned so they are generally not required. They are generally  used for adding a column with a different version. Members must be not private in order for the annotation processor to properly access the member. Static members and any methods will never be added as columns.
+`Column` is used to specify a field member that should be added as a column to the table. Columns are automatically inferred as non static, non private and table versioned so they are generally not required. They are generally used for adding a column with a different version. Members must not be private in order for the annotation processor to properly access the member. Static members and any methods will never be added as columns.
 
 `Primary Key` is used to specify the member that will be mapped to the _id column in SQLite. this value must be of type long and the value will be ignored when `Paprika.create(...)` is called. This value is useful when attempting to fetch, update or delete single entities. This value must be specified on all top level data objects.
 
-`ForeignColumn` is used when wanted to create a 1:1 mapping with another `Table`. The child object must follow the same rules and conventions as the parent object. The library will automatically recursivelly populate `ForeignColumn` data when fetching.
+`ForeignColumn` is used when wanted to create a 1:1 mapping with another `Table`. The child object must follow the same rules and conventions as the parent object. The library will automatically recursively populate `ForeignColumn` data when fetching.
 
 ```java
 @Table 
@@ -95,25 +95,25 @@ public class DataObjectChild {
 }
 ```
 
-`Ignore` is used for ignoring `Table` members that should not be inserted as columns into the database that other would (non private and/or non static members).
+`Ignore` is used for ignoring `Table` members that should not be inserted as columns into the database (non private and/or non static members).
 
-`Default` is for specifying a default column value when inserting a row to the database. The value in the annotation is always a `String` irregardless of member type.
+`Default` is for specifying a default column value when inserting a row to the database. The value in the annotation is always a `String` regardless of member type.
 
 `NonNull` is used for specifying that the member mapped to the column can't be null.
 
 `Unique` is used for specifying that the member mapped must contain a unique value in the database.
 
-`Drop` is used for dropping a column on a database upgrade. This can occur on a `Table` or `Column`. A version must be specified.
+`Drop` is used for dropping a column on a database migration. This can occur on a `Table` or `Column`. A version must be specified.
 
 ### Database Versioning
 
-Versioning is automatically handled for you by `Paprika`. Versioning is supported for `Column`, `Drop`, `ForeignObject`, and `Table`. These work by specifiying the apprioriate version number given an annotation such as:
+Versioning is automatically handled for you by `Paprika`. Versioning is supported for `Column`, `Drop`, `ForeignObject`, and `Table`. These work by specifiying the appropriate version number given an annotation such as:
 
 ```java
 @Table(version = 2)
 ```
 
-Versioning works by generating upgrade scripts that are run in the correct order on initalization. Therfore, the same rules when creating update scripts directly into the SqliteDbHelper apply for the annotated object (versioning must be acsending order, already created columns/tables can't be inserted again, etc).
+Versioning works by generating migration scripts that are run in the correct order on initalization. Therefore, the same rules when creating migration scripts directly into the SqliteDbHelper apply for the annotated object (versioning must be acsending order, already created columns/tables can't be inserted again, etc).
 
 ### Annotation Example
 
