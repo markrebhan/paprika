@@ -25,14 +25,16 @@ public class OneObjectTest {
         ));
 
         JavaFileObject expectedSqlScripts = JavaFileObjects.forSourceString("test.paprika/PaprikaSqlScripts",
-                "// Code Generated for Paprika. Do not modify! \n" +
-                "package com.mrebhan.paprika; \n" +
-                "import com.mrebhan.paprika.internal.SqlScripts;\n" +
+                "// Code Generated for Paprika. Do not modify!\n" +
+                        "package com.mrebhan.paprika;\n" +
+                        "\n" +
+                        "import com.mrebhan.paprika.internal.SqlScripts;\n" +
                         "import java.lang.Integer;\n" +
                         "import java.lang.Override;\n" +
                         "import java.lang.String;\n" +
                         "import java.util.ArrayList;\n" +
                         "import java.util.HashMap;\n" +
+                        "import java.util.LinkedHashMap;\n" +
                         "import java.util.List;\n" +
                         "import java.util.Map;\n" +
                         "\n" +
@@ -41,19 +43,19 @@ public class OneObjectTest {
                         "\n" +
                         "  static {\n" +
                         "    selectQueries = new HashMap();\n" +
-                        "    selectQueries.put(\"Test\",\"SELECT Test.thingone, Test.thingThree, Test.thingTwo FROM Test\");\n" +
+                        "    selectQueries.put(\"Test\",\"SELECT Test._id, Test.thingone, Test.thingThree, Test.thingTwo FROM Test\");\n" +
                         "  }\n" +
                         "\n" +
                         "  @Override\n" +
                         "  public List<String> getCreateScripts() {\n" +
                         "    List<String> statements = new ArrayList<>();\n" +
-                        "    statements.add(\"CREATE TABLE Test( thingone INTEGER , thingThree INTEGER , thingTwo TEXT )\");\n" +
+                        "    statements.add(\"CREATE TABLE Test( _id INTEGER PRIMARY KEY AUTOINCREMENT , thingone INTEGER , thingThree INTEGER , thingTwo TEXT )\");\n" +
                         "    return statements;\n" +
                         "  }\n" +
                         "\n" +
                         "  @Override\n" +
                         "  public Map<Integer, List<String>> getUpgradeScripts() {\n" +
-                        "    Map<Integer, List<String>> statementsMap = new HashMap<>();\n" +
+                        "    Map<Integer, List<String>> statementsMap = new LinkedHashMap<>();\n" +
                         "    return statementsMap;\n" +
                         "  }\n" +
                         "\n" +
@@ -71,8 +73,9 @@ public class OneObjectTest {
 
         JavaFileObject expectedMapper = JavaFileObjects.forSourceString("test/Test$$PaprikaMapper",
                 "// Code Generated for Paprika. Do not modify!\n" +
-                "package test;\n" +
-                "import android.content.ContentValues;\n" +
+                        "package test;\n" +
+                        "\n" +
+                        "import android.content.ContentValues;\n" +
                         "import android.database.Cursor;\n" +
                         "import com.mrebhan.paprika.internal.ContentValuesTree;\n" +
                         "import com.mrebhan.paprika.internal.ContentValuesWrapper;\n" +
@@ -84,6 +87,13 @@ public class OneObjectTest {
                         "\n" +
                         "@SuppressWarnings(\"ParcelCreator\")\n" +
                         "public final class Test$$PaprikaMapper extends Test implements PaprikaMapper<Test> {\n" +
+                        "  public long _id;\n" +
+                        "\n" +
+                        "  @Override\n" +
+                        "  public long getId() {\n" +
+                        "    return _id;\n" +
+                        "  }\n" +
+                        "\n" +
                         "  @Override\n" +
                         "  public void setupModel(Test model) {\n" +
                         "    thingone = model.thingone;\n" +
@@ -93,6 +103,8 @@ public class OneObjectTest {
                         "\n" +
                         "  @Override\n" +
                         "  public int setupModel(Cursor cursor, int index) {\n" +
+                        "    _id = cursor.getLong(index);\n" +
+                        "    index++;\n" +
                         "    thingone = cursor.getInt(index);\n" +
                         "    index++;\n" +
                         "    thingThree = cursor.getLong(index);\n" +

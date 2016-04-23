@@ -67,15 +67,16 @@ public final class SqlSelectScripts {
             return;
         }
 
+        stringBuilder.append(className);
+        stringBuilder.append('.');
+        stringBuilder.append(ID);
+        stringBuilder.append(", ");
+
         for (String key : elementMap.keySet()) {
             Element element = elementMap.get(key);
             ForeignObject foreignObject = element.getAnnotation(ForeignObject.class);
 
             if (foreignObject == null) {
-
-                if (element.getAnnotation(PrimaryKey.class) != null) {
-                    key = ID;
-                }
 
                 stringBuilder.append(className);
                 stringBuilder.append('.');

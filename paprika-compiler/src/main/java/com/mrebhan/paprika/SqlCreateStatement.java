@@ -20,8 +20,7 @@ public final class SqlCreateStatement {
         this.tableName = parent.getSimpleName().toString();
 
         columnDefinitions = new ArrayList<>();
-
-        boolean primaryKeyUsed = false;
+        columnDefinitions.add(ColumnDefinition.createPrimaryIdDefinition());
 
         for (String key : elementMap.keySet()) {
             Element element = elementMap.get(key);
@@ -41,21 +40,8 @@ public final class SqlCreateStatement {
                     upgradeScripts.addAlterAddColumn(columnDefinition, tableName, version);
                 }
             }
-
-            if ((columnDefinition.flags & FLAG_PRIMARY_KEY) != 0) {
-                if (!primaryKeyUsed) {
-                    primaryKeyUsed = true;
-                } else {
-                    throw new IllegalArgumentException("You can only specify one primary key! table = " + tableName);
-                }
-            }
-
             columnDefinitions.add(columnDefinition);
         }
-
-//        if (!primaryKeyUsed) {
-//            throw new IllegalArgumentException("Please specify a primary key! table = " + tableName);
-//        }
     }
 
     @Override

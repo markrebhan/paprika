@@ -8,7 +8,6 @@ import com.mrebhan.paprika.Column;
 import com.mrebhan.paprika.Default;
 import com.mrebhan.paprika.ForeignObject;
 import com.mrebhan.paprika.NonNull;
-import com.mrebhan.paprika.PrimaryKey;
 import com.mrebhan.paprika.Table;
 import com.mrebhan.paprika.Unique;
 
@@ -28,9 +27,6 @@ public class Spice implements Parcelable {
     @Retention(RUNTIME)
     @IntDef({SWEET, SOUR, BITTER, SPICY, SAVORY})
     public @interface Flavor{}
-
-    @PrimaryKey
-    long id;
 
     @NonNull
     @Unique
@@ -54,14 +50,6 @@ public class Spice implements Parcelable {
 
     @ForeignObject(version = 6)
     public SpiceStorage spiceStorage;
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
@@ -140,7 +128,6 @@ public class Spice implements Parcelable {
         dest.writeInt(this.tastiness);
         dest.writeString(this.description);
         dest.writeLong(this.updateTime);
-        dest.writeByteArray(image);
     }
 
     public Spice() {
@@ -153,7 +140,6 @@ public class Spice implements Parcelable {
         this.tastiness = in.readInt();
         this.description = in.readString();
         this.updateTime = in.readLong();
-        in.readByteArray(this.image);
     }
 
     public static final Creator<Spice> CREATOR = new Creator<Spice>() {

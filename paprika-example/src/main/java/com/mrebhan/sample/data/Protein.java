@@ -4,15 +4,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.mrebhan.paprika.NonNull;
-import com.mrebhan.paprika.PrimaryKey;
 import com.mrebhan.paprika.Table;
 import com.mrebhan.paprika.Unique;
 
 @Table(version = 2)
 public class Protein implements Parcelable {
-    
-    @PrimaryKey
-    long id;
     
     @NonNull
     @Unique
@@ -32,7 +28,6 @@ public class Protein implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(this.id);
         dest.writeString(this.name);
         dest.writeByte(isVegetarian ? (byte) 1 : (byte) 0);
         dest.writeByte(isPescetarian ? (byte) 1 : (byte) 0);
@@ -43,7 +38,6 @@ public class Protein implements Parcelable {
     }
 
     protected Protein(Parcel in) {
-        this.id = in.readLong();
         this.name = in.readString();
         this.isVegetarian = in.readByte() != 0;
         this.isPescetarian = in.readByte() != 0;

@@ -3,7 +3,6 @@ package com.mrebhan.sample.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.mrebhan.paprika.PrimaryKey;
 import com.mrebhan.paprika.Table;
 
 @Table(version = 7)
@@ -11,9 +10,6 @@ public class SpiceContainer implements Parcelable {
 
     public SpiceContainer() {
     }
-
-    @PrimaryKey
-    long id;
 
     float length;
     float width;
@@ -59,7 +55,6 @@ public class SpiceContainer implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(this.id);
         dest.writeFloat(this.length);
         dest.writeFloat(this.width);
         dest.writeFloat(this.height);
@@ -67,7 +62,6 @@ public class SpiceContainer implements Parcelable {
     }
 
     protected SpiceContainer(Parcel in) {
-        this.id = in.readLong();
         this.length = in.readFloat();
         this.width = in.readFloat();
         this.height = in.readFloat();

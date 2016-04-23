@@ -49,6 +49,15 @@ public final class ColumnDefinition {
     private ColumnDefinition() {
     }
 
+    public static ColumnDefinition createPrimaryIdDefinition() {
+        ColumnDefinition columnDefinition = new ColumnDefinition();
+        columnDefinition.name = "_id";
+        columnDefinition.dataType = "INTEGER";
+        columnDefinition.flags = FLAG_PRIMARY_KEY | FLAG_AUTOINCREMENT;
+
+        return columnDefinition;
+    }
+
     public ColumnDefinition(Element element) {
         this.name = element.getSimpleName().toString();
         setupDataType(element);
@@ -88,10 +97,6 @@ public final class ColumnDefinition {
                 flags |= FLAG_NON_NULL;
             } else if (Unique.class.getName().equals(modifier)) {
                 flags |= FLAG_UNIQUE;
-            } else if (PrimaryKey.class.getName().equals(modifier)) {
-                // TODO do not force auto autoincrement here
-                flags |= FLAG_PRIMARY_KEY | FLAG_AUTOINCREMENT;
-                name = "_id";
             } else if (Ignore.class.getName().equals(modifier)) {
                 flags = -1;
             }

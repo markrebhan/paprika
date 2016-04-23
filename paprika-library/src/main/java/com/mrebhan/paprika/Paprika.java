@@ -45,74 +45,59 @@ public final class Paprika {
      * @param data
      * @return
      */
-    public static Object create(Object data) {
+    public static Object createOrUpdate(Object data) {
 
-        final PaprikaMapper mapperClass;
+        final PaprikaMapper mapperClass = getMapperClass(data);
+        final long id = mapperClass.getId();
 
-        if (isSuperClass(data.getClass())) {
-            mapperClass = (PaprikaMapper) data;
+
+        if (id == 0) {
+            create(mapperClass);
         } else {
-            final Class superClass = findMapperClass(data.getClass());
-
-            try {
-                mapperClass = (PaprikaMapper) superClass.newInstance();
-                mapperClass.setupModel(data);
-
-            } catch (Exception e) {
-                throw new IllegalArgumentException(e.getMessage());
-            }
-        }
-
-        SQLiteDatabase db = dataHelper.getWritableDatabase();
-
-        ContentValuesTree contentValuesTree = mapperClass.getContentValuesTree();
-
-
-        while (contentValuesTree.hasNext()) {
-            ContentValuesWrapper contentValuesWrapper = contentValuesTree.next();
-            long row = db.insertWithOnConflict(contentValuesWrapper.getTableName(), null, contentValuesWrapper.getContentValues(), SQLiteDatabase.CONFLICT_REPLACE);
-
-            ContentValuesWrapper parent = contentValuesWrapper.getParentNode();
-            if (parent != null) {
-                parent.addExternalMappingIndex(row);
-            }
+           update(mapperClass);
         }
 
         return mapperClass;
     }
 
-    public static Object update(Object data, long id) {
-        final PaprikaMapper mapperClass;
+    public static Object create(Object data) {
+        final PaprikaMapper mapperClass = getMapperClass(data);
+        final long id = mapperClass.getId();
 
-        if (isSuperClass(data.getClass())) {
-            mapperClass = (PaprikaMapper) data;
-        } else {
-            final Class superClass = findMapperClass(data.getClass());
+        if (id == 0) {
+            ContentValuesTree contentValuesTree = mapperClass.getContentValuesTree();
+            SQLiteDatabase db = dataHelper.getWritableDatabase();
 
-            try {
-                mapperClass = (PaprikaMapper) superClass.newInstance();
-                mapperClass.setupModel(data);
+            while (contentValuesTree.hasNext()) {
+                ContentValuesWrapper contentValuesWrapper = contentValuesTree.next();
+                long row = db.insert(contentValuesWrapper.getTableName(), null, contentValuesWrapper.getContentValues());
 
-            } catch (Exception e) {
-                throw new IllegalArgumentException(e.getMessage());
+                ContentValuesWrapper parent = contentValuesWrapper.getParentNode();
+                if (parent != null) {
+                    parent.addExternalMappingIndex(row);
+                }
             }
+        } else {
+            throw new IllegalArgumentException("The item you are trying to insert already exists.");
         }
 
+        return mapperClass;
+    }
+
+    public static Object update(Object data) {
+        final PaprikaMapper mapperClass = getMapperClass(data);
         ContentValues contentValues = mapperClass.getContentValues();
 
-        SQLiteDatabase db = dataHelper.getWritableDatabase();
+        final long id = mapperClass.getId();
 
-        db.update(getTableName(data.getClass()), contentValues, "_id = ?", new String[]{Long.toString(id)});
+        if (id != 0) {
+            SQLiteDatabase db = dataHelper.getWritableDatabase();
+            db.update(getTableName(data.getClass()), contentValues, "_id = ?", new String[]{Long.toString(mapperClass.getId())});
+        } else {
+            throw new IllegalArgumentException("The item you are trying to update does not exist in the database");
+        }
 
         return mapperClass;
-    }
-
-    public static Object createOrUpdate(Object data, long id) {
-        if (id <= 0) {
-            return create(data);
-        } else {
-            return update(data, id);
-        }
     }
 
     public static <T> T get(Class<T> objectClazz, long id) {
@@ -179,10 +164,34 @@ public final class Paprika {
         }
     }
 
-    public static <T> void delete(Class<T> objectClazz, long id) {
-        SQLiteDatabase db = dataHelper.getWritableDatabase();
+    public static <T> void delete(Object data) {
+        final PaprikaMapper mapperClass = getMapperClass(data);
+        final long id = mapperClass.getId();
 
-        db.delete(getTableName(objectClazz), "_id = ?", new String[]{Long.toString(id)});
+        if (id != 0) {
+            SQLiteDatabase db = dataHelper.getWritableDatabase();
+            db.delete(getTableName(data.getClass()), "_id = ?", new String[]{Long.toString(id)});
+        }
+    }
+
+    private static PaprikaMapper getMapperClass(Object data) {
+        final PaprikaMapper mapperClass;
+
+        if (isSuperClass(data.getClass())) {
+            mapperClass = (PaprikaMapper) data;
+        } else {
+            final Class superClass = findMapperClass(data.getClass());
+
+            try {
+                mapperClass = (PaprikaMapper) superClass.newInstance();
+                mapperClass.setupModel(data);
+
+            } catch (Exception e) {
+                throw new IllegalArgumentException(e.getMessage());
+            }
+        }
+
+        return mapperClass;
     }
 
     private static boolean isSuperClass(Class clazz) {

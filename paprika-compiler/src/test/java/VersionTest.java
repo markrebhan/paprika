@@ -14,10 +14,8 @@ public class VersionTest {
         JavaFileObject source = JavaFileObjects.forSourceString("test.Test",
                 "package test;\n" +
                 "import com.mrebhan.paprika.Table;\n" +
-                "import com.mrebhan.paprika.PrimaryKey;\n" +
                 "@Table(version = 2)" +
                 "public class Test {\n" +
-                "@PrimaryKey long id;\n" +
                 "int testVal;\n" +
                 "}"
         );
@@ -32,6 +30,7 @@ public class VersionTest {
                         "import java.lang.String;\n" +
                         "import java.util.ArrayList;\n" +
                         "import java.util.HashMap;\n" +
+                        "import java.util.LinkedHashMap;\n" +
                         "import java.util.List;\n" +
                         "import java.util.Map;\n" +
                         "\n" +
@@ -52,7 +51,7 @@ public class VersionTest {
                         "\n" +
                         "  @Override\n" +
                         "  public Map<Integer, List<String>> getUpgradeScripts() {\n" +
-                        "    Map<Integer, List<String>> statementsMap = new HashMap<>();\n" +
+                        "    Map<Integer, List<String>> statementsMap = new LinkedHashMap<>();\n" +
                         "    List<String> statements2 = new ArrayList<>();\n" +
                         "    statements2.add(\"CREATE TABLE Test( _id INTEGER PRIMARY KEY AUTOINCREMENT , testVal INTEGER )\");\n" +
                         "    statementsMap.put(2, statements2);\n" +
@@ -87,15 +86,20 @@ public class VersionTest {
                         "\n" +
                         "@SuppressWarnings(\"ParcelCreator\")\n" +
                         "public final class Test$$PaprikaMapper extends Test implements PaprikaMapper<Test> {\n" +
+                        "  public long _id;\n" +
+                        "\n" +
+                        "  @Override\n" +
+                        "  public long getId() {\n" +
+                        "    return _id;\n" +
+                        "  }\n" +
                         "  @Override\n" +
                         "  public void setupModel(Test model) {\n" +
-                        "    id = model.id;\n" +
                         "    testVal = model.testVal;\n" +
                         "  }\n" +
                         "\n" +
                         "  @Override\n" +
                         "  public int setupModel(Cursor cursor, int index) {\n" +
-                        "    id = cursor.getLong(index);\n" +
+                        "    _id = cursor.getLong(index);\n" +
                         "    index++;\n" +
                         "    testVal = cursor.getInt(index);\n" +
                         "    index++;\n" +
@@ -138,10 +142,8 @@ public class VersionTest {
                         "import com.mrebhan.paprika.Table;\n" +
                         "import com.mrebhan.paprika.Column;\n" +
                         "import com.mrebhan.paprika.Drop;\n" +
-                        "import com.mrebhan.paprika.PrimaryKey;\n" +
                         "import java.lang.String;\n" +
                         "@Table public class Test {\n" +
-                        "@PrimaryKey long id;\n" +
                         "int testVal;\n" +
                         "String desc;\n" +
                         "@Column(version = 3) String data;\n" +
@@ -161,6 +163,7 @@ public class VersionTest {
                         "import java.lang.String;\n" +
                         "import java.util.ArrayList;\n" +
                         "import java.util.HashMap;\n" +
+                        "import java.util.LinkedHashMap;\n" +
                         "import java.util.List;\n" +
                         "import java.util.Map;\n" +
                         "\n" +
@@ -181,7 +184,7 @@ public class VersionTest {
                         "\n" +
                         "  @Override\n" +
                         "  public Map<Integer, List<String>> getUpgradeScripts() {\n" +
-                        "    Map<Integer, List<String>> statementsMap = new HashMap<>();\n" +
+                        "    Map<Integer, List<String>> statementsMap = new LinkedHashMap<>();\n" +
                         "    List<String> statements2 = new ArrayList<>();\n" +
                         "    statements2.add(\"ALTER TABLE Test ADD COLUMN otherVal INTEGER \");\n" +
                         "    statementsMap.put(2, statements2);\n" +
@@ -222,9 +225,14 @@ public class VersionTest {
                         "\n" +
                         "@SuppressWarnings(\"ParcelCreator\")\n" +
                         "public final class Test$$PaprikaMapper extends Test implements PaprikaMapper<Test> {\n" +
+                        "  public long _id;\n" +
+                        "\n" +
+                        "  @Override\n" +
+                        "  public long getId() {\n" +
+                        "    return _id;\n" +
+                        "  }\n" +
                         "  @Override\n" +
                         "  public void setupModel(Test model) {\n" +
-                        "    id = model.id;\n" +
                         "    otherthing = model.otherthing;\n" +
                         "    desc = model.desc;\n" +
                         "    otherVal = model.otherVal;\n" +
@@ -235,7 +243,7 @@ public class VersionTest {
                         "\n" +
                         "  @Override\n" +
                         "  public int setupModel(Cursor cursor, int index) {\n" +
-                        "    id = cursor.getLong(index);\n" +
+                        "    _id = cursor.getLong(index);\n" +
                         "    index++;\n" +
                         "    otherthing = cursor.getLong(index);\n" +
                         "    index++;\n" +

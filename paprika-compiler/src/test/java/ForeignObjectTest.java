@@ -31,9 +31,7 @@ public class ForeignObjectTest {
                         "import com.mrebhan.paprika.Table;" +
                         "import com.mrebhan.paprika.ForeignObject;" +
                         "import java.lang.Integer;" +
-                        "import com.mrebhan.paprika.PrimaryKey;" +
                         "@Table public class Test2 {" +
-                        "@PrimaryKey long id;" +
                         "Integer thingOne;" +
                         "Integer thingTwo;" +
                         "@ForeignObject Test test;" +
@@ -55,6 +53,7 @@ public class ForeignObjectTest {
                         "import java.lang.String;\n" +
                         "import java.util.ArrayList;\n" +
                         "import java.util.HashMap;\n" +
+                        "import java.util.LinkedHashMap;\n" +
                         "import java.util.List;\n" +
                         "import java.util.Map;\n" +
                         "\n" +
@@ -63,21 +62,21 @@ public class ForeignObjectTest {
                         "\n" +
                         "  static {\n" +
                         "    selectQueries = new HashMap();\n" +
-                        "    selectQueries.put(\"Test\",\"SELECT Test.thingThree, Test.thingTwo, Test.thingOne FROM Test\");\n" +
-                        "    selectQueries.put(\"Test2\",\"SELECT Test2._id, Test.thingThree, Test.thingTwo, Test.thingOne, Test2.thingTwo, Test2.thingOne FROM Test2 LEFT JOIN Test ON Test2.test = Test._id\");\n" +
+                        "    selectQueries.put(\"Test\",\"SELECT Test._id, Test.thingThree, Test.thingTwo, Test.thingOne FROM Test\");\n" +
+                        "    selectQueries.put(\"Test2\",\"SELECT Test2._id, Test._id, Test.thingThree, Test.thingTwo, Test.thingOne, Test2.thingTwo, Test2.thingOne FROM Test2 LEFT JOIN Test ON Test2.test = Test._id\");\n" +
                         "  }\n" +
                         "\n" +
                         "  @Override\n" +
                         "  public List<String> getCreateScripts() {\n" +
                         "    List<String> statements = new ArrayList<>();\n" +
                         "    statements.add(\"CREATE TABLE Test2( _id INTEGER PRIMARY KEY AUTOINCREMENT , test INTEGER , thingTwo INTEGER , thingOne INTEGER )\");\n" +
-                        "    statements.add(\"CREATE TABLE Test( thingThree BLOB , thingTwo TEXT , thingOne INTEGER )\");\n" +
+                        "    statements.add(\"CREATE TABLE Test( _id INTEGER PRIMARY KEY AUTOINCREMENT , thingThree BLOB , thingTwo TEXT , thingOne INTEGER )\");\n" +
                         "    return statements;\n" +
                         "  }\n" +
                         "\n" +
                         "  @Override\n" +
                         "  public Map<Integer, List<String>> getUpgradeScripts() {\n" +
-                        "    Map<Integer, List<String>> statementsMap = new HashMap<>();\n" +
+                        "    Map<Integer, List<String>> statementsMap = new LinkedHashMap<>();\n" +
                         "    return statementsMap;\n" +
                         "  }\n" +
                         "\n" +
@@ -108,6 +107,13 @@ public class ForeignObjectTest {
                         "\n" +
                         "@SuppressWarnings(\"ParcelCreator\")\n" +
                         "public final class Test$$PaprikaMapper extends Test implements PaprikaMapper<Test> {\n" +
+                        "  public long _id;\n" +
+                        "\n" +
+                        "  @Override\n" +
+                        "  public long getId() {\n" +
+                        "    return _id;\n" +
+                        "  }\n" +
+                        "\n" +
                         "  @Override\n" +
                         "  public void setupModel(Test model) {\n" +
                         "    thingThree = model.thingThree;\n" +
@@ -117,6 +123,8 @@ public class ForeignObjectTest {
                         "\n" +
                         "  @Override\n" +
                         "  public int setupModel(Cursor cursor, int index) {\n" +
+                        "    _id = cursor.getLong(index);\n" +
+                        "    index++;\n" +
                         "    thingThree = cursor.getBlob(index);\n" +
                         "    index++;\n" +
                         "    thingTwo = cursor.getString(index);\n" +
@@ -165,9 +173,14 @@ public class ForeignObjectTest {
                         "\n" +
                         "@SuppressWarnings(\"ParcelCreator\")\n" +
                         "public final class Test2$$PaprikaMapper extends Test2 implements PaprikaMapper<Test2> {\n" +
+                        "  public long _id;\n" +
+                        "\n" +
+                        "  @Override\n" +
+                        "  public long getId() {\n" +
+                        "    return _id;\n" +
+                        "  }\n" +
                         "  @Override\n" +
                         "  public void setupModel(Test2 model) {\n" +
-                        "    id = model.id;\n" +
                         "    if (model.test != null) {\n" +
                         "      test = new Test$$PaprikaMapper();\n" +
                         "      ((Test$$PaprikaMapper)test).setupModel(model.test);\n" +
@@ -178,7 +191,7 @@ public class ForeignObjectTest {
                         "\n" +
                         "  @Override\n" +
                         "  public int setupModel(Cursor cursor, int index) {\n" +
-                        "    id = cursor.getLong(index);\n" +
+                        "    _id = cursor.getLong(index);\n" +
                         "    index++;\n" +
                         "    test = new Test$$PaprikaMapper();\n" +
                         "    index = ((Test$$PaprikaMapper)test).setupModel(cursor,index);\n" +

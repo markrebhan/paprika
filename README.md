@@ -55,10 +55,10 @@ public class PaprikaMethodsDemo() {
 		dataModel = dataModels.get(0);
 		dataModel.name = "Jane Doe"
 		dataModel.image = new byte[] {};
-		Paprika.update(dataModel, dataModel.id);
+		Paprika.update(dataModel);
 	
 		// delete entry from database
-		Paprika.delete(DataModel.class, dataModel.id);
+		Paprika.delete(dataModel);
 	}
 }
 ```

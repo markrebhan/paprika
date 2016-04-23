@@ -4,14 +4,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.mrebhan.paprika.ForeignObject;
-import com.mrebhan.paprika.PrimaryKey;
 import com.mrebhan.paprika.Table;
 
 @Table(version = 6)
 public class SpiceStorage implements Parcelable {
-
-    @PrimaryKey
-    long id;
 
     String name;
 

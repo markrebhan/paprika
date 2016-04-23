@@ -54,7 +54,6 @@ public final class PaprikaProcessor extends AbstractProcessor {
         types.add(ForeignObject.class.getCanonicalName());
         types.add(Ignore.class.getCanonicalName());
         types.add(NonNull.class.getCanonicalName());
-        types.add(PrimaryKey.class.getCanonicalName());
         types.add(Table.class.getCanonicalName());
         types.add(Unique.class.getCanonicalName());
 

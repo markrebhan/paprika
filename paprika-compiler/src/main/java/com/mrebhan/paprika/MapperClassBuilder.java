@@ -70,6 +70,7 @@ public final class MapperClassBuilder {
                 .addSuperinterface(ParameterizedTypeName.get(PAPRIKA_MAPPER, TypeName.get(type)))
                 .addAnnotation(AnnotationSpec.builder(SuppressWarnings.class).addMember("value", "$S", "ParcelCreator").build());
 
+        builder.addMethod(buildGetIdMethod());
         builder.addMethod(buildSetupModelCopyMethod(elementMap, type));
         builder.addMethod(buildSetupModelCursorMethod(elementMap));
         builder.addMethod(buildContentValuesMethod(elementMap));
@@ -106,16 +107,12 @@ public final class MapperClassBuilder {
         for (String key : elementMap.keySet()) {
             // TODO only for autoincrement
             Element element = elementMap.get(key);
-            if (element.getAnnotation(PrimaryKey.class) == null) {
+            ForeignObject foreignObject = element.getAnnotation(ForeignObject.class);
 
-                ForeignObject foreignObject = element.getAnnotation(ForeignObject.class);
-
-                if (foreignObject == null) {
-                    getContentResolverMethod.addStatement("contentValues.put($S,$L)", key, key);
-                } else {
-                    // TODO do not use keys in case of multiple
-                    externalMappingsMethod.addStatement("externalMappings.add($S)", key);
-                }
+            if (foreignObject == null) {
+                getContentResolverMethod.addStatement("contentValues.put($S,$L)", key, key);
+            } else {
+                externalMappingsMethod.addStatement("externalMappings.add($S)", key);
             }
         }
 
@@ -137,13 +134,10 @@ public final class MapperClassBuilder {
 
         for (String key : elementMap.keySet()) {
             Element element = elementMap.get(key);
-            if (element.getAnnotation(PrimaryKey.class) == null) {
+            ForeignObject foreignObject = element.getAnnotation(ForeignObject.class);
 
-                ForeignObject foreignObject = element.getAnnotation(ForeignObject.class);
-
-                if (foreignObject != null) {
-                    addChildWrapper(element, getContentResolverMethod, "rootWrapper");
-                }
+            if (foreignObject != null) {
+                addChildWrapper(element, getContentResolverMethod, "rootWrapper");
             }
         }
 
@@ -191,6 +185,9 @@ public final class MapperClassBuilder {
                 .addParameter(int.class, "index")
                 .returns(int.class);
 
+        setupModel.addStatement("_id = cursor.getLong(index)");
+        setupModel.addStatement("$L++", "index");
+
         for (String key : elementMap.keySet()) {
             Element element = elementMap.get(key);
 
@@ -210,6 +207,19 @@ public final class MapperClassBuilder {
         setupModel.addStatement("return $L", "index");
 
         return setupModel.build();
+    }
+
+    private MethodSpec buildGetIdMethod() {
+        builder.addField(long.class, "_id", Modifier.PUBLIC);
+
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("getId")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .returns(long.class);
+
+        builder.addStatement("return _id");
+
+        return builder.build();
     }
 
     private MethodSpec buildSetupModelCopyMethod(Map<String, Element> elementMap, TypeMirror type) {

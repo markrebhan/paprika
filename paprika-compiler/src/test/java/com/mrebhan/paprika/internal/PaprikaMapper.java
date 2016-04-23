@@ -6,6 +6,7 @@ import android.database.Cursor;
 import java.util.ArrayList;
 
 public interface PaprikaMapper<T> {
+    long getId();
     void setupModel(T copy);
     int setupModel(Cursor cursor, int index);
     ContentValues getContentValues();

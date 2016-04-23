@@ -35,8 +35,8 @@ public class SpiceDetailsActivity extends AppCompatActivity {
         return new Intent(context, SpiceDetailsActivity.class);
     }
 
-    public static Intent getIntent(Context context, long id) {
-        return new Intent(context, SpiceDetailsActivity.class).putExtra(ARG_SPICE_ID, id);
+    public static Intent getIntent(Context context, Spice spice) {
+        return new Intent(context, SpiceDetailsActivity.class).putExtra(ARG_SPICE_ID, spice);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class SpiceDetailsActivity extends AppCompatActivity {
                 spice.setDescription(description.getText().toString());
 
                 if (spice.getName() != null) {
-                    Paprika.createOrUpdate(spice, spice.getId());
+                    Paprika.createOrUpdate(spice);
                     startActivity(new Intent(SpiceDetailsActivity.this, MainActivity.class));
                 }
             }
@@ -64,7 +64,7 @@ public class SpiceDetailsActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             if (getIntent().hasExtra(ARG_SPICE_ID)) {
-                spice = Paprika.get(Spice.class, getIntent().getLongExtra(ARG_SPICE_ID, 0));
+                spice = getIntent().getParcelableExtra(ARG_SPICE_ID);
                 isEdit = true;
             } else {
                 spice = new Spice();
@@ -98,7 +98,7 @@ public class SpiceDetailsActivity extends AppCompatActivity {
 
         switch (item.getItemId()) {
             case R.id.delete:
-                Paprika.delete(Spice.class, spice.getId());
+                Paprika.delete(spice);
                 finish();
                 return true;
         }
