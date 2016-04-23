@@ -5,6 +5,7 @@ import com.squareup.javapoet.JavaFile;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -71,7 +72,7 @@ public final class PaprikaProcessor extends AbstractProcessor {
 
         isProcessed = true;
 
-        Map<Element, Map<String, Element>> tableMap = new HashMap<>();
+        Map<Element, Map<String, Element>> tableMap = new LinkedHashMap<>();
 
         for (Element element : roundEnv.getElementsAnnotatedWith(Table.class)) {
             tableMap.put(element, getElementMap(element));

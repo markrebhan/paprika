@@ -23,6 +23,7 @@ public final class PaprikaMappings {
     public static final ClassName ARRAY_LIST = ClassName.get("java.util", "ArrayList");
     public static final ClassName LIST = ClassName.get("java.util", "List");
     public static final ClassName HASH_MAP = ClassName.get("java.util", "HashMap");
+    public static final ClassName LINKED_HASH_MAP = ClassName.get("java.util", "LinkedHashMap");
     public static final ClassName MAP = ClassName.get("java.util", "Map");
     public static final ClassName INTEGER = ClassName.get("java.lang", "Integer");
 

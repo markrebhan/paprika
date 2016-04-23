@@ -57,7 +57,7 @@ public final class SqlUpgradeScripts {
                 .addAnnotation(Override.class)
                 .returns(mapOfList);
 
-        upgradeMethod.addStatement("$T statementsMap = new $T<>()", mapOfList, HASH_MAP);
+        upgradeMethod.addStatement("$T statementsMap = new $T<>()", mapOfList, LINKED_HASH_MAP);
 
         for (int version : upgradeScripts.keySet()) {
             Set<String> scripts = upgradeScripts.get(version);

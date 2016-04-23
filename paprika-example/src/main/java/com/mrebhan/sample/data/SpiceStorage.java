@@ -10,7 +10,6 @@ import com.mrebhan.paprika.Table;
 @Table(version = 6)
 public class SpiceStorage implements Parcelable {
 
-    //TODO make this so this doesn't has to be added
     @PrimaryKey
     long id;
 

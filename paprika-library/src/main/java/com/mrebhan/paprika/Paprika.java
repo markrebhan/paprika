@@ -25,9 +25,6 @@ public final class Paprika {
     private static final Map<Class, Class> CLASS_TO_PAPRIKA_MAP = new WeakHashMap<>();
     private static SqlScripts sqlScripts;
 
-    public Paprika() {
-    }
-
     //TODO pass in name and version
     public static void init(Context context, String databaseName) {
         if (dataHelper == null) {
@@ -150,11 +147,6 @@ public final class Paprika {
     }
 
     public static <T> List<T> getList(Class<T> objectClazz) {
-        return getList(objectClazz, null, null, null);
-    }
-
-    // TODO add query builder maybe
-    public static <T> List<T> getList(Class<T> objectClazz, String selection, String[] selectionArgs, String orderBy) {
         Class superClass = findMapperClass(objectClazz);
 
         SQLiteDatabase db = dataHelper.getWritableDatabase();

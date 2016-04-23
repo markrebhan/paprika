@@ -1,22 +1,17 @@
 import com.google.common.base.Joiner;
-import com.google.common.truth.Truth;
 import com.google.testing.compile.JavaFileObjects;
-import com.google.testing.compile.JavaSourceSubjectFactory;
-import com.google.testing.compile.JavaSourcesSubjectFactory;
-import com.mrebhan.paprika.ForeignObject;
 import com.mrebhan.paprika.PaprikaProcessor;
 
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.tools.JavaFileObject;
 
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
 
-public class TwoObjectTest {
+public class ForeignObjectTest {
 
     @Test public void testTwoObjectsWithRelation() {
 
