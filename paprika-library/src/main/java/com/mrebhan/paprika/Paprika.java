@@ -100,37 +100,6 @@ public final class Paprika {
         return mapperClass;
     }
 
-    public static <T> T get(Class<T> objectClazz, long id) {
-        Class superClass = findMapperClass(objectClazz);
-
-        SQLiteDatabase db = dataHelper.getWritableDatabase();
-
-        //TODO clean this
-        Cursor cursor = db.rawQuery(sqlScripts.getSelectQuery(getTableName(superClass)) + " WHERE " + getTableName(objectClazz) + "._id=" + id, null);
-
-        try {
-            T item = null;
-
-            if (cursor.getCount() > 0 && !cursor.isClosed()) {
-                cursor.moveToFirst();
-
-                try {
-                    PaprikaMapper mapper = (PaprikaMapper) superClass.newInstance();
-                    mapper.setupModel(cursor, 0);
-                    item = (T) mapper;
-
-                } catch (Exception e) {
-                    throw new IllegalArgumentException(e.getMessage());
-                }
-
-            }
-            return item;
-
-        } finally {
-            cursor.close();
-        }
-    }
-
     public static <T> List<T> getList(Class<T> objectClazz) {
         Class superClass = findMapperClass(objectClazz);
 

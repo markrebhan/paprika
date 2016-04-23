@@ -81,10 +81,8 @@ public class VersionTest {
                         "import com.mrebhan.paprika.internal.PaprikaMapper;\n" +
                         "import java.lang.Override;\n" +
                         "import java.lang.String;\n" +
-                        "import java.lang.SuppressWarnings;\n" +
                         "import java.util.ArrayList;\n" +
                         "\n" +
-                        "@SuppressWarnings(\"ParcelCreator\")\n" +
                         "public final class Test$$PaprikaMapper extends Test implements PaprikaMapper<Test> {\n" +
                         "  public long _id;\n" +
                         "\n" +
@@ -220,10 +218,8 @@ public class VersionTest {
                         "import com.mrebhan.paprika.internal.PaprikaMapper;\n" +
                         "import java.lang.Override;\n" +
                         "import java.lang.String;\n" +
-                        "import java.lang.SuppressWarnings;\n" +
                         "import java.util.ArrayList;\n" +
                         "\n" +
-                        "@SuppressWarnings(\"ParcelCreator\")\n" +
                         "public final class Test$$PaprikaMapper extends Test implements PaprikaMapper<Test> {\n" +
                         "  public long _id;\n" +
                         "\n" +

@@ -1,7 +1,9 @@
 package com.mrebhan.paprika;
 
 import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -9,6 +11,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.lang.model.element.Element;
@@ -67,8 +70,7 @@ public final class MapperClassBuilder {
         builder = TypeSpec.classBuilder(superClassName)
                 .superclass(ClassName.get((TypeElement) parent))
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addSuperinterface(ParameterizedTypeName.get(PAPRIKA_MAPPER, TypeName.get(type)))
-                .addAnnotation(AnnotationSpec.builder(SuppressWarnings.class).addMember("value", "$S", "ParcelCreator").build());
+                .addSuperinterface(ParameterizedTypeName.get(PAPRIKA_MAPPER, TypeName.get(type)));
 
         builder.addMethod(buildGetIdMethod());
         builder.addMethod(buildSetupModelCopyMethod(elementMap, type));
@@ -76,7 +78,16 @@ public final class MapperClassBuilder {
         builder.addMethod(buildContentValuesMethod(elementMap));
         builder.addMethod(buildContentValuesTreeMethod(elementMap, parent));
         builder.addMethod(externalMappingsMethod.build());
+
+        List<? extends TypeMirror> interfaces = ((TypeElement) parent).getInterfaces();
+        if (!interfaces.isEmpty() && "android.os.Parcelable".equals(interfaces.get(0).toString())) {
+            builder.addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC).build());
+            builder.addMethod(buildParcelConstructor());
+            builder.addMethod(buildWriteToParcelMethod());
+            builder.addField(buildCreatorField(ClassName.bestGuess(superClassName)));
+        }
     }
+
 
     public JavaFile build() {
         return JavaFile.builder(packageName, builder.build())
@@ -246,6 +257,56 @@ public final class MapperClassBuilder {
         }
 
         return setupModel.build();
+    }
+
+    private MethodSpec buildWriteToParcelMethod() {
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("writeToParcel")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .addParameter(PARCEL, "dest")
+                .addParameter(int.class, "flags");
+
+        builder.addStatement("super.writeToParcel(dest, flags)");
+        builder.addStatement("dest.writeLong(this._id)");
+
+        return builder.build();
+    }
+
+    private MethodSpec buildParcelConstructor() {
+        MethodSpec.Builder builder = MethodSpec.constructorBuilder()
+                .addParameter(PARCEL, "in")
+                .addModifiers(Modifier.PROTECTED);
+
+        builder.addStatement("super(in)");
+        builder.addStatement("this._id = in.readLong()");
+
+        return builder.build();
+    }
+
+    private FieldSpec buildCreatorField(TypeName type) {
+        TypeName typedCreator = ParameterizedTypeName.get(CREATOR, type);
+
+        FieldSpec.Builder builder = FieldSpec.builder(typedCreator, "CREATOR", Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL);
+
+        TypeSpec creator = TypeSpec.anonymousClassBuilder("")
+                .addSuperinterface(typedCreator)
+                .addMethod(MethodSpec.methodBuilder("createFromParcel")
+                        .addParameter(PARCEL, "source")
+                        .returns(type)
+                        .addModifiers(Modifier.PUBLIC)
+                        .addStatement("return new $T(source)", type)
+                        .build())
+                .addMethod(MethodSpec.methodBuilder("newArray")
+                        .addParameter(int.class, "size")
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(ArrayTypeName.of(type))
+                        .addStatement("return new $T[size]", type)
+                        .build())
+                .build();
+
+        builder.initializer("$L", creator);
+
+        return builder.build();
     }
 
     private String getCursorFormat(Element element) {

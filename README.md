@@ -1,7 +1,7 @@
 Paprika
 =======
 
-`Paprika` is a lightweight Android ORM library that creates all necessary SQL mappings during compile time avoiding the bloat needed for run time reflection based ORM's. It is more flexible than other code generated ORM's because the developer is in full control of how the objects should look and behave allowing the data objects to be reused for other data model tasks such as serialization.
+`Paprika` is a lightweight Android ORM library that creates all necessary SQL mappings during compile time avoiding the bloat needed for run time reflection based ORM's. It is more flexible than other code generated ORM's because the developer is in full control of how the objects should look and behave allowing the data objects to be reused for other data model tasks. The library supports using `Parcelable` on your data models for any data marshalling needs within an application.
 
 ### Example
 
@@ -24,9 +24,6 @@ public class MainApplication extends Application {
 ```java
 @Table
 public class DataModel {
-	@PrimaryKey
-	long id;
-
 	String name;
 	String desciption;
 	int userId;
@@ -68,16 +65,11 @@ public class PaprikaMethodsDemo() {
 
 `Column` is used to specify a field member that should be added as a column to the table. Columns are automatically inferred as non static, non private and table versioned so they are generally not required. They are generally used for adding a column with a different version. Members must not be private in order for the annotation processor to properly access the member. Static members and any methods will never be added as columns.
 
-`Primary Key` is used to specify the member that will be mapped to the _id column in SQLite. this value must be of type long and the value will be ignored when `Paprika.create(...)` is called. This value is useful when attempting to fetch, update or delete single entities. This value must be specified on all top level data objects.
-
 `ForeignColumn` is used when wanted to create a 1:1 mapping with another `Table`. The child object must follow the same rules and conventions as the parent object. The library will automatically recursively populate `ForeignColumn` data when fetching.
 
 ```java
 @Table 
 public class DataObjectParent {
-	@PrimaryKey
-	long id;
-
 	String name;
 
 	float measuredValue;
@@ -121,9 +113,6 @@ Versioning works by generating migration scripts that are run in the correct ord
 @Table(version = 1)
 public class ThingOne {
 
-	@PrimaryKey
-	long id;
-	
 	@NonNull
 	String name;
 	
@@ -160,9 +149,6 @@ public class ThingTwo {
 @Table(version = 4)
 public class ThingThree {
 	
-	@PrimaryKey
-	long id;
-
 	@Ignore
 	int someId;
 

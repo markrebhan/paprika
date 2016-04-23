@@ -102,10 +102,8 @@ public class ForeignObjectTest {
                         "import com.mrebhan.paprika.internal.PaprikaMapper;\n" +
                         "import java.lang.Override;\n" +
                         "import java.lang.String;\n" +
-                        "import java.lang.SuppressWarnings;\n" +
                         "import java.util.ArrayList;\n" +
                         "\n" +
-                        "@SuppressWarnings(\"ParcelCreator\")\n" +
                         "public final class Test$$PaprikaMapper extends Test implements PaprikaMapper<Test> {\n" +
                         "  public long _id;\n" +
                         "\n" +
@@ -168,10 +166,8 @@ public class ForeignObjectTest {
                         "import com.mrebhan.paprika.internal.PaprikaMapper;\n" +
                         "import java.lang.Override;\n" +
                         "import java.lang.String;\n" +
-                        "import java.lang.SuppressWarnings;\n" +
                         "import java.util.ArrayList;\n" +
                         "\n" +
-                        "@SuppressWarnings(\"ParcelCreator\")\n" +
                         "public final class Test2$$PaprikaMapper extends Test2 implements PaprikaMapper<Test2> {\n" +
                         "  public long _id;\n" +
                         "\n" +

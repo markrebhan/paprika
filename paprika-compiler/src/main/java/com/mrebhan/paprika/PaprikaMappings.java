@@ -26,6 +26,8 @@ public final class PaprikaMappings {
     public static final ClassName LINKED_HASH_MAP = ClassName.get("java.util", "LinkedHashMap");
     public static final ClassName MAP = ClassName.get("java.util", "Map");
     public static final ClassName INTEGER = ClassName.get("java.lang", "Integer");
+    public static final ClassName PARCEL = ClassName.get("android.os", "Parcel");
+    public static final ClassName CREATOR = ClassName.get("android.os.Parcelable", "Creator");
 
     private final Map<Element, Map<String, Element>> tableMap;
     private final TypeSpec.Builder builder;
