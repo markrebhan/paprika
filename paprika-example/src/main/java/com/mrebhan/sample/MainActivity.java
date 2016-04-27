@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    startActivity(SpiceDetailsActivity.getIntent(itemView.getContext(), spice));
+                    startActivity(SpiceDetailsActivity.getIntent(itemView.getContext(), Paprika.getId(spice)));
                 }
             });
         }

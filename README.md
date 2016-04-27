@@ -53,6 +53,10 @@ public class PaprikaMethodsDemo() {
 		dataModel.name = "Jane Doe"
 		dataModel.image = new byte[] {};
 		Paprika.update(dataModel);
+
+		// get dataModel by id
+		long id = Paprika.getId(dataModel);
+		dataModel = Paprika.get(DataModel.class, id);
 	
 		// delete entry from database
 		Paprika.delete(dataModel);
