@@ -18,38 +18,28 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Table(version = 1)
 public class Spice implements Parcelable {
 
-    public static final int SWEET = 0;
-    public static final int SOUR = 1;
-    public static final int BITTER = 2;
-    public static final int SPICY = 3;
-    public static final int SAVORY = 4;
+    public Spice() {
+    }
 
-    @Retention(RUNTIME)
-    @IntDef({SWEET, SOUR, BITTER, SPICY, SAVORY})
-    public @interface Flavor{}
+    protected Spice(Parcel in) {
+        this.name = in.readString();
+        this.description = in.readString();
+        this.scovilleValue = in.readInt();
+        this.color = in.readString();
+        this.spiceScientificData = in.readParcelable(SpiceScientificData.class.getClassLoader());
+    }
 
-    @NonNull
-    @Unique
     String name;
 
-    @Spice.Flavor
-    int flavor;
-
-    int tastiness;
-
-    @Column(version = 3)
+    @Column(version = 2)
     String description;
 
-    @Column(version = 4)
-    @NonNull
-    @Default("0")
-    long updateTime;
+    int scovilleValue;
 
-    @Column(version = 5)
-    byte[] image;
+    String color;
 
-    @ForeignObject(version = 6)
-    public SpiceStorage spiceStorage;
+    @ForeignObject(version = 2)
+    SpiceScientificData spiceScientificData;
 
     public String getName() {
         return name;
@@ -57,18 +47,6 @@ public class Spice implements Parcelable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public int getFlavor() {
-        return flavor;
-    }
-
-    public void setFlavor(int flavor) {
-        this.flavor = flavor;
-    }
-
-    public int getTastiness() {
-        return tastiness;
     }
 
     public String getDescription() {
@@ -79,41 +57,28 @@ public class Spice implements Parcelable {
         this.description = description;
     }
 
-    public void setTastiness(int tastiness) {
-        this.tastiness = tastiness;
+    public int getScovilleValue() {
+        return scovilleValue;
     }
 
-    public long getUpdateTime() {
-        return updateTime;
+    public void setScovilleValue(int scovilleValue) {
+        this.scovilleValue = scovilleValue;
     }
 
-    public void setUpdateTime(long updateTime) {
-        this.updateTime = updateTime;
+    public String getColor() {
+        return color;
     }
 
-    public byte[] getImage() {
-        return image;
+    public void setColor(String color) {
+        this.color = color;
     }
 
-    public void setImage(byte[] image) {
-        this.image = image;
+    public SpiceScientificData getSpiceScientificData() {
+        return spiceScientificData;
     }
 
-    public String getFlavorString() {
-        switch (flavor) {
-            case SWEET:
-                return "Sweet";
-            case SOUR:
-                return "Sour";
-            case BITTER:
-                return "Bitter";
-            case SPICY:
-                return "Spicy";
-            case SAVORY:
-                return "Savory";
-        }
-
-        return null;
+    public void setSpiceScientificData(SpiceScientificData spiceScientificData) {
+        this.spiceScientificData = spiceScientificData;
     }
 
     @Override
@@ -124,22 +89,10 @@ public class Spice implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.name);
-        dest.writeInt(this.flavor);
-        dest.writeInt(this.tastiness);
         dest.writeString(this.description);
-        dest.writeLong(this.updateTime);
-    }
-
-    public Spice() {
-    }
-
-    @SuppressWarnings("ResourceType")
-    protected Spice(Parcel in) {
-        this.name = in.readString();
-        this.flavor = in.readInt();
-        this.tastiness = in.readInt();
-        this.description = in.readString();
-        this.updateTime = in.readLong();
+        dest.writeInt(this.scovilleValue);
+        dest.writeString(this.color);
+        dest.writeParcelable(spiceScientificData, flags);
     }
 
     public static final Creator<Spice> CREATOR = new Creator<Spice>() {

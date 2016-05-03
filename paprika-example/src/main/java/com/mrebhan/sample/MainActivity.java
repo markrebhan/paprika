@@ -90,15 +90,11 @@ public class MainActivity extends AppCompatActivity {
 
         private TextView name;
         private TextView description;
-        private TextView flavor;
-        private TextView tastiness;
 
         public ViewHolder(View itemView) {
             super(itemView);
             name = (TextView) itemView.findViewById(R.id.name);
             description = (TextView) itemView.findViewById(R.id.description);
-            flavor = (TextView) itemView.findViewById(R.id.flavor);
-            tastiness = (TextView) itemView.findViewById(R.id.tastiness);
         }
 
         public void bind(final Spice spice) {
@@ -110,8 +106,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 description.setVisibility(View.GONE);
             }
-            flavor.setText(spice.getFlavorString());
-            tastiness.setText(Integer.toString(spice.getTastiness()));
+
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
